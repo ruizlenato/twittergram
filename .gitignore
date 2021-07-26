@@ -1,0 +1,12 @@
+# Session Files
+twittergram/*.session*
+
+# Config Files
+twittergram/config.py
+
+# Python Cache
+__pycache__/
+__pycache__/
+twittergram/__pycache__/
+twittergram/plugins/__pycache__/
+

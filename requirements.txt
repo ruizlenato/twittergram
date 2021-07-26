@@ -1,0 +1,4 @@
+git+https://github.com/AmanoTeam/Pyrogram.git
+tweepy
+youtube-dl
+rich
