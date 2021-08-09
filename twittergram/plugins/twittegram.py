@@ -6,12 +6,12 @@ from twittergram import apitweepy
 from pyrogram.types import Message
 from pyrogram import Client, filters
 
-TWITTER_LINKS = r"(https?:\/\/(?:www\.)?(?:v\.)?(?:twitter.com)\/(?:.*?))(?:\s|$)"
+TWITTER_LINKS = r"(http(s)?:\/\/(?:www\.)?(?:v\.)?(?:twitter.com)\/(?:.*?))(?:\s|$)"
 
 
 @Client.on_message(filters.regex(TWITTER_LINKS))
 async def ytdl(c: Client, m: Message):
-    url = m.text.split(maxsplit=0)[0]
+    url = m.matches[0].group(0)
     filename = "/tmp/%s%s.mp4" % (m.chat.id, m.message_id)
     ydl_opts = {"outtmpl": filename}
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
