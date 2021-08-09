@@ -8,17 +8,19 @@ from pyrogram import Client, filters
 
 TWITTER_LINKS = r"(https?:\/\/(?:www\.)?(?:v\.)?(?:twitter.com)\/(?:.*?))(?:\s|$)"
 
+
 @Client.on_message(filters.regex(TWITTER_LINKS))
 async def ytdl(c: Client, m: Message):
     url = m.text.split(maxsplit=0)[0]
-    filename = '/tmp/%s%s.mp4' % (m.chat.id, m.message_id)
-    ydl_opts = {'outtmpl': filename}
+    filename = "/tmp/%s%s.mp4" % (m.chat.id, m.message_id)
+    ydl_opts = {"outtmpl": filename}
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
-    with open(filename, 'rb') as video:
+    with open(filename, "rb") as video:
         await m.reply_video(video=video)
     os.remove(filename)
+
 
 @Client.on_message(filters.command("userinfo"))
 async def uinfo(c: Client, m: Message):
@@ -45,8 +47,6 @@ async def uinfo(c: Client, m: Message):
             rep = "Username errado"
             await m.reply_text(rep)
     else:
-        rep = "Você esquceu do username" 
+        rep = "Você esquceu do username"
         await m.reply_text(rep)
     return
-
-
