@@ -1,6 +1,7 @@
 import os
 import tweepy
-import youtube_dl
+import yt_dlp
+import tempfile
 
 from twittergram import apitweepy
 from pyrogram.types import Message
@@ -12,9 +13,11 @@ TWITTER_LINKS = r"(http(s)?:\/\/(?:www\.)?(?:v\.)?(?:twitter.com)\/(?:.*?))(?:\s
 @Client.on_message(filters.regex(TWITTER_LINKS))
 async def ytdl(c: Client, m: Message):
     url = m.matches[0].group(0)
-    filename = "/tmp/%s%s.mp4" % (m.chat.id, m.message_id)
+    with tempfile.TemporaryDirectory() as tempdir:
+        path = os.path.join(tempdir, "ytdl")
+    filename = f"{path}/%s%s.mp4" % (m.chat.id, m.message_id)
     ydl_opts = {"outtmpl": filename}
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
     with open(filename, "rb") as video:
