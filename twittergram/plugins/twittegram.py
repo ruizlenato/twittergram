@@ -7,7 +7,7 @@ from twittergram import apitweepy
 from pyrogram.types import Message
 from pyrogram import Client, filters
 
-TWITTER_LINKS = r"(http(s)?:\/\/(?:www\.)?(?:v\.)?(?:twitter.com)\/(?:.*?))(?:\s|$)"
+TWITTER_LINKS = r"(http(s)?:\/\/(?:www\.)?(?:mobile\.)?(?:v\.)?(?:twitter.com)\/(?:.*?))(?:\s|$)"
 
 
 @Client.on_message(filters.regex(TWITTER_LINKS))
