@@ -10,7 +10,7 @@ from pyrogram import Client, filters
 TWITTER_LINKS = r"(http(s)?:\/\/(?:www\.)?(?:mobile\.)?(?:v\.)?(?:twitter.com)\/(?:.*?))(?:\s|$)"
 
 
-@Client.on_message(filters.regex(TWITTER_LINKS))
+@Client.on_message(filters.regex(TWITTER_LINKS) & ~filters.edited)
 async def ytdl(c: Client, m: Message):
     url = m.matches[0].group(0)
     with tempfile.TemporaryDirectory() as tempdir:
