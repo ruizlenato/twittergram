@@ -25,7 +25,7 @@ async def uinfo(c: Client, m: Message):
 
     if username:
         try:
-            user = await apitweepy.get_user(screen_name=username)
+            user = apitweepy.get_user(screen_name=username)
             rep = f"<b>Informações da conta <a href='https://twitter.com/{username}'>@{username}</a> (Twitter):</b>\n"
             rep += f"\n<b>Nome:</b> <code>{user.name}</code>"
             rep += f"\n<b>Bio:</b> <code>{user.description}</code>"
