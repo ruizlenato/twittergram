@@ -1,5 +1,5 @@
 git+https://github.com/AmanoTeam/pyrogram
-tgcrypto==1.2.3
-tweepy==4.9.0
-yt-dlp==2022.4.8
-rich==12.4.1
+tgcrypto>=1.2.3
+tweepy[async]>=4.9.0
+yt-dlp>=2022.4.8
+rich>=12.4.1
