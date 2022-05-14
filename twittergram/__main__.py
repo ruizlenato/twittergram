@@ -10,7 +10,6 @@ from twittergram.config import API_HASH, API_ID, BOT_TOKEN
 # Enable logging
 logging.basicConfig(format="%(asctime)s - %(message)s", level="WARNING")
 logging.getLogger("pyrogram.client").setLevel(logging.WARNING)
-
 log = logging.getLogger("rich")
 logs = "[bold purple]TwitterGram Running[/bold purple]"
 logs += f"\n[TwitterGram] Project maintained by: Renatoh"
@@ -37,8 +36,9 @@ class Twittegram(Client):
         print(f"[green] TwitterGram Started...")
 
     async def stop(self, *args):
-        await super().stop()
+        await super().stop()  # Disconnect from telegram's servers
         print(f"[red] TwitterGram Stopped, Bye.")
+
 
 if __name__ == "__main__":
     try:
