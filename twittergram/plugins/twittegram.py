@@ -62,9 +62,7 @@ class MyLogger:
     def debug(self, msg):
         # For compatibility with youtube-dl, both debug and info are passed into debug
         # You can distinguish them by the prefix '[debug] '
-        if msg.startswith("[debug] "):
-            pass
-        else:
+        if not msg.startswith("[debug] "):
             self.info(msg)
 
     def info(self, msg):
@@ -75,7 +73,5 @@ class MyLogger:
 
     @staticmethod
     def error(msg):
-        if "There's no video" in msg:
-            pass
-        else:
+        if "There's no video" not in msg:
             print(msg)

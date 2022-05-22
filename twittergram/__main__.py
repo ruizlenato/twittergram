@@ -33,11 +33,11 @@ class Twittegram(Client):
 
     async def start(self):
         await super().start()  # Connect to telegram's servers
-        print(f"[green] TwitterGram Started...")
+        print("[green] TwitterGram Started...")
 
     async def stop(self, *args):
         await super().stop()  # Disconnect from telegram's servers
-        print(f"[red] TwitterGram Stopped, Bye.")
+        print("[red] TwitterGram Stopped, Bye.")
 
 
 if __name__ == "__main__":
