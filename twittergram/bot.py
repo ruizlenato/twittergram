@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2021-2022 Luiz Renato (ruizlenato@proton.me)
+import os
+import shutil
+
 from pyrogram import Client
 from pyrogram.enums import ParseMode
 
@@ -26,6 +29,8 @@ class Client(Client):
 
     async def start(self):
         await database.connect()
+        shutil.rmtree("./downloads/", ignore_errors=True)
+        os.mkdir("./downloads/")
         await super().start()  # Connect to telegram's servers
 
     async def stop(self) -> None:
