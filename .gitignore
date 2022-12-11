@@ -1,0 +1,13 @@
+# Config Files
+*config.py
+.vscode/
+
+# Python Cache
+*__pycache__/
+
+
+# Session Files
+twittergram/client.session*
+
+# Database Files
+*.sql*
