@@ -44,7 +44,12 @@ class Twitter:
         )
         self.files: list = []
 
-        for media in tweet["includes"]["media"]:
+        try:
+            tweet_medias = tweet["includes"]["media"]
+        except KeyError:
+            return
+
+        for media in tweet_medias:
             if media["type"] in ("animated_gif", "video"):
                 key = media["media_key"]
                 bitrate = [

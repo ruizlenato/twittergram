@@ -48,7 +48,7 @@ async def uinfo(c: Client, m: Message):
 
 @Client.on_message(filters.regex(TWITTER_LINKS))
 async def Twitter(c: Client, m: Message):
-    a = await c.invoke(
+    rawM = await c.invoke(
         pyrogram.raw.functions.messages.GetMessages(
             id=[pyrogram.raw.types.InputMessageID(id=(m.id))]
         )
@@ -57,14 +57,14 @@ async def Twitter(c: Client, m: Message):
     url = m.matches[0].group(0)
     files = await TwitterAPI.download(url, f"{m.id}{m.chat.id}")
 
-    if (
-        a.messages[0].media
-        and len(files) == 1
-        and re.search(r"InputMediaPhoto", str(files[0]), re.M)
-    ):
-        return
-
     if files:
+        if (
+            rawM.messages[0].media
+            and len(files) == 1
+            and re.search(r"InputMediaPhoto", str(files[0]), re.M)
+        ):
+            return
+
         await c.send_chat_action(m.chat.id, ChatAction.UPLOAD_DOCUMENT)
         await m.reply_media_group(media=files)
     return shutil.rmtree(f"./downloads/{id}/", ignore_errors=True)
