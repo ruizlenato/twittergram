@@ -2,8 +2,8 @@
 TwittergramRobot
 ================
 
-Twittergram is a bot for telegram with some Twitter related functions
-Can be found as `@Twittergram <https://t.me/twittergram>`__ on Telegram.
+| Twittergram is a bot for telegram with some Twitter related functions
+| Can be found as `@TwitterGramRobot <https://t.me/TwitterGramRobot>`__ on Telegram.
 
 Setup - How to host locally
 ---------------------------
