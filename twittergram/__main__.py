@@ -9,7 +9,7 @@ from pyrogram import idle
 from .bot import Client
 
 # Custom logging format
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO,
     format="\u001B[33m%(levelname)s | \u001B[35m%(name)s \u001B[31m| %(asctime)s | \u001B[37m%(message)s",
@@ -26,13 +26,13 @@ async def main():
     try:
         # start the bot
         await client.start()
-        logger.info("\033[92m[🚀] - Bot started.\033[0m")
+        log.info("\033[92m[🚀] - Bot started.\033[0m")
         await idle()
     except KeyboardInterrupt:
-        logger.warning("Forced stop... Bye!")
+        log.warning("Forced stop... Bye!")
     finally:
         await client.stop()
-        logger.warning("\033[93mBye!\033[0m")
+        log.warning("\033[93mBye!\033[0m")
 
 
 if __name__ == "__main__":
