@@ -51,12 +51,12 @@ class Twitter:
 
         for media in tweet_medias:
             if media["type"] in ("animated_gif", "video"):
-                key = media["media_key"]
                 bitrate = [
                     a["bit_rate"]
                     for a in media["variants"]
                     if a["content_type"] == "video/mp4"
                 ]
+                key = media["media_key"]
                 for a in media["variants"]:
                     with contextlib.suppress(FileExistsError):
                         os.mkdir(f"./downloads/{id}/")
@@ -85,9 +85,10 @@ class Twitter:
                                     supports_streaming=True,
                                 )
                             )
-            else:
+            elif len(self.files) == 0:
                 self.files += [InputMediaPhoto(media["url"], caption=caption)]
-
+            else:
+                self.files += [InputMediaPhoto(media["url"])]
         return self.files
 
 
