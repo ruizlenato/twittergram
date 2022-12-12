@@ -50,7 +50,8 @@ class Twitter:
             return
 
         for media in tweet_medias:
-            if media["type"] in ("animated_gif", "video"):
+            ttype = media["type"]
+            if ttype == "video":
                 bitrate = [
                     a["bit_rate"]
                     for a in media["variants"]
@@ -85,10 +86,16 @@ class Twitter:
                                     supports_streaming=True,
                                 )
                             )
-            elif len(self.files) == 0:
-                self.files += [InputMediaPhoto(media["url"], caption=caption)]
+
+            elif ttype == "animated_gif":
+                url = media["variants"][0]["url"]
+                self.files.append({"type": ttype, "url": url, "caption": caption})
             else:
-                self.files += [InputMediaPhoto(media["url"])]
+                if len(self.files) == 0:
+                    self.files += [InputMediaPhoto(str(media["url"]), caption=caption)]
+                else:
+                    self.files += [InputMediaPhoto(media["url"])]
+
         return self.files
 
 
