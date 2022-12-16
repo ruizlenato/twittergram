@@ -13,6 +13,7 @@ from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo
 from pyrogram.raw.types import InputMessageID
 from pyrogram.enums import ChatAction, ChatType
 from pyrogram.raw.functions import channels, messages
+from pyrogram.errors.exceptions import ChannelInvalid
 
 TWITTER_LINKS = r"(https?://(?:www.|mobile.)?twitter.com/.*?/.*?/([0-9]+))"
 
@@ -24,7 +25,7 @@ async def uinfo(c: Client, m: Message):
     else:
         return await m.reply_text(await strings(m, "Twitter.no_username"))
 
-    user = await TwitterAPI.user(username)
+    user = await TwitterAPI().user(username)
     if user is None:
         return await m.reply_text(await strings(m, "Twitter.wrong_username"))
 
@@ -50,15 +51,9 @@ async def uinfo(c: Client, m: Message):
 
 @Client.on_message(filters.regex(TWITTER_LINKS))
 async def Twitter(c: Client, m: Message):
-    rawM = await c.invoke(
-        pyrogram.raw.functions.messages.GetMessages(
-            id=[pyrogram.raw.types.InputMessageID(id=(m.id))]
-        )
-    )
-
     url = m.matches[0].group(0)
     path = f"{m.id}{m.chat.id}"
-    files, caption = await TwitterAPI.download(url, path)
+    files, caption = await TwitterAPI().download(url, path)
 
     if m.chat.type == ChatType.PRIVATE:
         method = messages.GetMessages(id=[InputMessageID(id=(m.id))])
@@ -66,7 +61,11 @@ async def Twitter(c: Client, m: Message):
         method = channels.GetMessages(
             channel=await c.resolve_peer(m.chat.id), id=[InputMessageID(id=(m.id))]
         )
-    rawM = (await c.invoke(method)).messages[0].media
+    try:
+        rawM = (await c.invoke(method)).messages[0].media
+    except ChannelInvalid:
+        return
+
     medias = []
 
     for media in files:
@@ -81,9 +80,18 @@ async def Twitter(c: Client, m: Message):
             return shutil.rmtree(f"./downloads/{path}/", ignore_errors=True)
         mType = InputMediaVideo if media["path"][-3:] == "mp4" else InputMediaPhoto
         if not medias:
-            medias.append(mType(media["path"], caption=caption))
+            medias.append(
+                mType(
+                    media["path"],
+                    width=media["width"],
+                    height=media["height"],
+                    caption=caption,
+                )
+            )
         else:
-            medias.append(mType(media["path"]))
+            medias.append(
+                mType(media["path"], width=media["width"], height=media["height"])
+            )
 
     if medias:
         if rawM and len(medias) == 1 and "InputMediaPhoto" in str(medias[0]):

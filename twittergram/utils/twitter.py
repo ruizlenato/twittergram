@@ -12,7 +12,7 @@ from ..config import BARRER_TOKEN
 http = httpx.AsyncClient(http2=True, timeout=30.0, follow_redirects=True)
 
 
-class Twitter:
+class TwitterAPI:
     def __init__(self):
         self.TwitterAPI: str = "https://api.twitter.com/2/"
 
@@ -80,6 +80,3 @@ class Twitter:
                     }
                 )
         return self.files, caption
-
-
-TwitterAPI = Twitter()
