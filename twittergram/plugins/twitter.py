@@ -9,7 +9,7 @@ from ..locales import strings
 from ..utils import TwitterAPI
 
 from pyrogram import filters
-from pyrogram.types import Message
+from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo
 from pyrogram.raw.types import InputMessageID
 from pyrogram.enums import ChatAction, ChatType
 from pyrogram.raw.functions import channels, messages
@@ -57,7 +57,9 @@ async def Twitter(c: Client, m: Message):
     )
 
     url = m.matches[0].group(0)
-    files = await TwitterAPI.download(url, f"{m.id}{m.chat.id}")
+    path = f"{m.id}{m.chat.id}"
+    files, caption = await TwitterAPI.download(url, path)
+
     if m.chat.type == ChatType.PRIVATE:
         method = messages.GetMessages(id=[InputMessageID(id=(m.id))])
     else:
@@ -65,16 +67,28 @@ async def Twitter(c: Client, m: Message):
             channel=await c.resolve_peer(m.chat.id), id=[InputMessageID(id=(m.id))]
         )
     rawM = (await c.invoke(method)).messages[0].media
+    medias = []
 
-    if files:
-        if rawM and len(files) == 1 and "InputMediaPhoto" in str(files[0]):
+    for media in files:
+        if media["path"][-3:] == "mp4" and len(files) == 1:
+            await c.send_chat_action(m.chat.id, ChatAction.UPLOAD_VIDEO)
+            await m.reply_video(
+                video=media["path"],
+                width=media["width"],
+                height=media["height"],
+                caption=caption,
+            )
+            return shutil.rmtree(f"./downloads/{path}/", ignore_errors=True)
+        mType = InputMediaVideo if media["path"][-3:] == "mp4" else InputMediaPhoto
+        if not medias:
+            medias.append(mType(media["path"], caption=caption))
+        else:
+            medias.append(mType(media["path"]))
+
+    if medias:
+        if rawM and len(medias) == 1 and "InputMediaPhoto" in str(medias[0]):
             return
 
-        with contextlib.suppress(TypeError):
-            if files[0]["type"] == "animated_gif":
-                y = files[0]
-                return await m.reply_animation(animation=y["url"], caption=y["caption"])
-
         await c.send_chat_action(m.chat.id, ChatAction.UPLOAD_DOCUMENT)
-        await m.reply_media_group(media=files)
-    return shutil.rmtree(f"./downloads/{id}/", ignore_errors=True)
+        await m.reply_media_group(media=medias)
+    return shutil.rmtree(f"./downloads/{path}/", ignore_errors=True)

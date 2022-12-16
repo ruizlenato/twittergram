@@ -6,8 +6,6 @@ import json
 import httpx
 import contextlib
 
-from pyrogram.types import InputMediaPhoto, InputMediaVideo
-
 from ..config import BARRER_TOKEN
 
 # httpx Things
@@ -50,8 +48,7 @@ class Twitter:
             return
 
         for media in tweet_medias:
-            ttype = media["type"]
-            if ttype == "video":
+            if media["type"] in ("animated_gif", "video"):
                 bitrate = [
                     a["bit_rate"]
                     for a in media["variants"]
@@ -67,36 +64,22 @@ class Twitter:
                         path = f"./downloads/{id}/{key}.mp4"
                         with open(path, "wb") as f:
                             f.write((await http.get(a["url"])).content)
-                        if len(self.files) > 0:
-                            self.files.append(
-                                InputMediaVideo(
-                                    path,
-                                    width=media["width"],
-                                    height=media["height"],
-                                    supports_streaming=True,
-                                )
-                            )
-                        else:
-                            self.files.append(
-                                InputMediaVideo(
-                                    path,
-                                    caption=caption,
-                                    width=media["width"],
-                                    height=media["height"],
-                                    supports_streaming=True,
-                                )
-                            )
-
-            elif ttype == "animated_gif":
-                url = media["variants"][0]["url"]
-                self.files.append({"type": ttype, "url": url, "caption": caption})
+                        self.files.append(
+                            {
+                                "path": path,
+                                "width": media["width"],
+                                "height": media["height"],
+                            }
+                        )
             else:
-                if len(self.files) == 0:
-                    self.files += [InputMediaPhoto(str(media["url"]), caption=caption)]
-                else:
-                    self.files += [InputMediaPhoto(media["url"])]
-
-        return self.files
+                self.files.append(
+                    {
+                        "path": media["url"],
+                        "width": media["width"],
+                        "height": media["height"],
+                    }
+                )
+        return self.files, caption
 
 
 TwitterAPI = Twitter()
