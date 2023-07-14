@@ -1,38 +1,35 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2021-2022 Luiz Renato (ruizlenato@protonmail.com)
-core:
+metada:
   flag: "🇺🇸"
-  name: "American English"
-  code: "en-US"
+  name: "English (United States)"
 
 strings:
-  # Main
-  Main:
-    private_start_msg: |
+  start:
+    private_start_message: |
      <b>Click on the help button to see all available functions!</b>
 
       📦 <b>My SourceCode:</b> <a href='https://github.com/ruizlenato/Twittergram'>GitHub</a>
     group_start_msg: "Click the button below and see all my features."
-    lang_saved: "Language changed successfully"
+    language_saved: "Language changed successfully"
     select_lang: "Select the language you want to use the bot"
-    back_btn: "↩️ Back"
-    btn_lang: "🇺🇸 Language"
-    btn_help: "❓ Help"
+    back_button: "↩️ Back"
+    language_button: "🇺🇸 Language"
+    help_button: "❓ Help"
     not_admin: "You are not a group admin."
     help_msg: |
       <b>Send me a link to a Twitter video and I will send it to you automatically.</b>
       📌 It works in groups, just add me to your group.
 
       <b>/twitter (username of Twitter) -</b> returns information from the specified Twitter account.
-      <b>/lang -</b> change the language of the bot.
 
-  Twitter:
+  twitter:
     no_username: "You forgot to specify the Twitter user name.\n<b>Command usage</b> <code>/twitter (twitter username)</code>"
     wrong_username: "The Twitter user could not be found, please make sure that you have spelled the account's username correctly."
-    acc_info: "<b><a href='https://twitter.com/{}'>@{}</a> Account Information (Twitter):</b>\n"
-    name: "\n<b>Name:</b> {}"
-    verified: "\n<b>Verified:</b> {}"
-    bio: "\n<b>Bio:</b> <code>{}</code>"
-    followers: "\n<b>Followers:</b> <i>{}</i>"
-    following: "\n<b>Following:</b> <i>{}</i>"
-    tweets: "\n<b>Tweets:</b> <i>{}</i>"
+    account_info: "<b><a href='https://twitter.com/{}'>@{}</a> Account Information (Twitter):</b>\n"
+    account_name: "\n<b>Name:</b> {}"
+    account_verified: "\n<b>Verified:</b> {}"
+    account_bio: "\n<b>Bio:</b> <code>{}</code>"
+    account_followers: "\n<b>Followers:</b> <i>{}</i>"
+    account_following: "\n<b>Following:</b> <i>{}</i>"
+    account_tweets: "\n<b>Tweets:</b> <i>{}</i>"
