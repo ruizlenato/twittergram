@@ -108,7 +108,7 @@ _limited_actions_policy_enabled": True,
             ),
         }
 
-        res = (
+        r = (
             await http.get(
                 "https://twitter.com/i/api/graphql/NmCeCgkVlsRGS1cAwqtgmw/TweetDetail",
                 params=params,
@@ -118,35 +118,38 @@ _limited_actions_policy_enabled": True,
 
         self.files: list = []
         try:
-            tweet = res["data"]["threaded_conversation_with_injections_v2"]["instructions"][0][
+            res = r["data"]["threaded_conversation_with_injections_v2"]["instructions"][0][
                 "entries"
-            ][0]["content"]["itemContent"]["tweet_results"]["result"]
+            ]
+
+            for entries in res:
+                if x[1] in entries["entryId"]:
+                    tweet = entries["content"]["itemContent"]["tweet_results"]["result"]
+            user_name = tweet["core"]["user_results"]["result"]["legacy"]["name"]
+            caption = f"<b>{user_name}</b>\n{tweet['legacy']['full_text']}"
+
+            for media in tweet["legacy"]["extended_entities"]["media"]:
+                if media["type"] in ("animated_gif", "video"):
+                    bitrate = [
+                        a["bitrate"]
+                        for a in media["video_info"]["variants"]
+                        if a["content_type"] == "video/mp4"
+                    ]
+                    for a in media["video_info"]["variants"]:
+                        if a["content_type"] == "video/mp4" and a["bitrate"] == max(bitrate):
+                            url = a["url"]
+
+                    await self.downloader(
+                        url,
+                        media["original_info"]["width"],
+                        media["original_info"]["height"],
+                    )
+                else:
+                    await self.downloader(
+                        media["media_url_https"],
+                        media["original_info"]["width"],
+                        media["original_info"]["height"],
+                    )
+            return self.files, caption
         except KeyError:
             return None
-
-        user_name = tweet["core"]["user_results"]["result"]["legacy"]["name"]
-        caption = f"<b>{user_name}</b>\n{tweet['legacy']['full_text']}"
-
-        for media in tweet["legacy"]["extended_entities"]["media"]:
-            if media["type"] in ("animated_gif", "video"):
-                bitrate = [
-                    a["bitrate"]
-                    for a in media["video_info"]["variants"]
-                    if a["content_type"] == "video/mp4"
-                ]
-                for a in media["video_info"]["variants"]:
-                    if a["content_type"] == "video/mp4" and a["bitrate"] == max(bitrate):
-                        url = a["url"]
-
-                await self.downloader(
-                    url,
-                    media["original_info"]["width"],
-                    media["original_info"]["height"],
-                )
-            else:
-                await self.downloader(
-                    media["media_url_https"],
-                    media["original_info"]["width"],
-                    media["original_info"]["height"],
-                )
-        return self.files, caption
