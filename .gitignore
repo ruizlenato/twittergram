@@ -1,13 +1,17 @@
-# Config Files
-*config.py
-.vscode/
-
-# Python Cache
-*__pycache__/
-
-
 # Session Files
 twittergram/client.session*
 
 # Database Files
 *.sql*
+
+# Python cache
+__pycache__/
+
+# VSCode settings
+.vscode
+
+# Config's files and useless stuff
+config.py
+twittergram/*.session*
+locales/*/*/*.mo
+*.db*
