@@ -1,110 +1,100 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2021-2022 Luiz Renato (ruizlenato@proton.me)
-import contextlib
-import shutil
-import pyrogram
+
+import filetype
+from pyrogram import filters
+from pyrogram.enums import ChatAction, ChatType
+from pyrogram.errors.exceptions import ChannelInvalid
+from pyrogram.raw.functions import channels, messages
+from pyrogram.raw.types import InputMessageID
+from pyrogram.types import InputMediaPhoto, InputMediaVideo, Message
 
 from ..bot import Client
-from ..locales import strings
+from ..locales import locale
 from ..utils import TwitterAPI
-
-from pyrogram import filters
-from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo
-from pyrogram.raw.types import InputMessageID
-from pyrogram.enums import ChatAction, ChatType
-from pyrogram.raw.functions import channels, messages
-from pyrogram.errors.exceptions import ChannelInvalid
 
 TWITTER_LINKS = r"(https?://(?:www.|mobile.)?twitter.com/.*?/.*?/([0-9]+))"
 
 
 @Client.on_message(filters.command(["twitter", "uinfo"]))
-async def uinfo(c: Client, m: Message):
-    if len(m.command) > 1:
-        username = m.text.split(None, 1)[1]
+@locale("twitter")
+async def uinfo(client: Client, message: Message, strings):
+    if len(message.command) > 1:
+        username = message.text.split(None, 1)[1]
     else:
-        return await m.reply_text(await strings(m, "Twitter.no_username"))
-
-    user = await TwitterAPI().user(username)
-    if user is None:
-        return await m.reply_text(await strings(m, "Twitter.wrong_username"))
+        return await message.reply_text(strings["no_username"])
 
     try:
-        rep = (await strings(m, "Twitter.acc_info")).format(username, username)
-        rep += (await strings(m, "Twitter.name")).format(user["name"])
-        rep += (await strings(m, "Twitter.verified")).format(user["verified"])
-        rep += (await strings(m, "Twitter.bio")).format(user["description"])
-        rep += (await strings(m, "Twitter.followers")).format(
-            user["public_metrics"]["followers_count"]
-        )
-        rep += (await strings(m, "Twitter.following")).format(
-            user["public_metrics"]["following_count"]
-        )
-        rep += (await strings(m, "Twitter.tweets")).format(
-            user["public_metrics"]["tweet_count"]
-        )
-        await m.reply_text(rep, disable_web_page_preview=True)
+        user = (await TwitterAPI().user(username))["data"]["user"]["result"]["legacy"]
+    except KeyError:
+        return await message.reply_text(strings["wrong_username"])
+
+    try:
+        rep = strings["account_info"].format(username, username)
+        rep += strings["account_name"].format(user["name"])
+        rep += strings["account_verified"].format(user["verified"])
+        rep += strings["account_bio"].format(user["description"])
+        rep += strings["account_followers"].format(user["followers_count"])
+        rep += strings["account_following"].format(user["friends_count"])
+        rep += strings["account_tweets"].format(user["statuses_count"])
+        await message.reply_text(rep, disable_web_page_preview=True)
     except AttributeError as error:
         print(error)
-        return await m.reply_text(await strings(m, "Twitter.wrong_username"))
+        return await message.reply_text(strings["wrong_username"])
 
 
 @Client.on_message(filters.regex(TWITTER_LINKS))
-async def Twitter(c: Client, m: Message):
-    url = m.matches[0].group(0)
-    path = f"{m.id}{m.chat.id}"
+async def Twitter(client: Client, message: Message):
+    url = message.matches[0].group(0)
+    path = f"{message.id}{message.chat.id}"
     files, caption = await TwitterAPI().download(url, path)
 
-    if m.chat.type == ChatType.PRIVATE:
-        method = messages.GetMessages(id=[InputMessageID(id=(m.id))])
+    if message.chat.type == ChatType.PRIVATE:
+        method = messages.GetMessages(id=[InputMessageID(id=(message.id))])
     else:
         method = channels.GetMessages(
-            channel=await c.resolve_peer(m.chat.id), id=[InputMessageID(id=(m.id))]
+            channel=await client.resolve_peer(message.chat.id), id=[InputMessageID(id=(message.id))]
         )
     try:
-        rawM = (await c.invoke(method)).messages[0].media
+        rawM = (await client.invoke(method)).messages[0].media
     except ChannelInvalid:
-        return
+        return None
 
     medias = []
-
     for media in files:
-        if media["path"][-3:] == "mp4" and len(files) == 1:
-            await c.send_chat_action(m.chat.id, ChatAction.UPLOAD_VIDEO)
-            await m.reply_video(
-                video=media["path"],
+        if filetype.is_video(media["media"]) and len(files) == 1:
+            await client.send_chat_action(message.chat.id, ChatAction.UPLOAD_VIDEO)
+            return await message.reply_video(
+                video=media["media"],
                 width=media["width"],
                 height=media["height"],
                 caption=caption,
             )
-            return shutil.rmtree(f"./downloads/{path}/", ignore_errors=True)
-        mType = InputMediaVideo if media["path"][-3:] == "mp4" else InputMediaPhoto
 
-        if media["path"][-3:] == "mp4":
+        if filetype.is_video(media["media"]):
             if medias:
                 medias.append(
-                    InputMediaVideo(
-                        media["path"], width=media["width"], height=media["height"]
-                    )
+                    InputMediaVideo(media["media"], width=media["width"], height=media["height"])
                 )
             else:
                 medias.append(
                     InputMediaVideo(
-                        media["path"],
+                        media["media"],
                         width=media["width"],
                         height=media["height"],
                         caption=caption,
                     )
                 )
         elif not medias:
-            medias.append(InputMediaPhoto(media["path"], caption=caption))
+            medias.append(InputMediaPhoto(media["media"], caption=caption))
         else:
-            medias.append(InputMediaPhoto(media["path"]))
+            medias.append(InputMediaPhoto(media["media"]))
 
     if medias:
         if rawM and len(medias) == 1 and "InputMediaPhoto" in str(medias[0]):
-            return
+            return None
 
-        await c.send_chat_action(m.chat.id, ChatAction.UPLOAD_DOCUMENT)
-        await m.reply_media_group(media=medias)
-    return shutil.rmtree(f"./downloads/{path}/", ignore_errors=True)
+        await client.send_chat_action(message.chat.id, ChatAction.UPLOAD_DOCUMENT)
+        await message.reply_media_group(media=medias)
+        return None
+    return None
