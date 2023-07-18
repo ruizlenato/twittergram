@@ -125,6 +125,10 @@ _limited_actions_policy_enabled": True,
             for entries in res:
                 if x[1] in entries["entryId"]:
                     tweet = entries["content"]["itemContent"]["tweet_results"]["result"]
+
+            if tweet["__typename"] == "TweetWithVisibilityResults":
+                tweet = tweet["tweet"]
+
             user_name = tweet["core"]["user_results"]["result"]["legacy"]["name"]
             caption = f"<b>{user_name}</b>\n{tweet['legacy']['full_text']}"
 
