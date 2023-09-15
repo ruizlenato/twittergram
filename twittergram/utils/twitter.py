@@ -63,11 +63,11 @@ Gecko/20100101 Firefox/116.0",
 
     async def download(self, url: str, id: int):
         # Extract the tweet ID from the URL
-        x = re.match(".*twitter.com/.+status/([A-Za-z0-9]+)", url)
+        x = re.match(".*(twitter|x).com/.+status/([A-Za-z0-9]+)", url)
         params = {
             "variables": json.dumps(
                 {
-                    "focalTweetId": x[1],
+                    "focalTweetId": x[2],
                     "referrer": "messages",
                     "includePromotedContent": True,
                     "withCommunity": True,
@@ -123,7 +123,7 @@ _limited_actions_policy_enabled": True,
             ]
 
             for entries in res:
-                if x[1] in entries["entryId"]:
+                if x[2] in entries["entryId"]:
                     tweet = entries["content"]["itemContent"]["tweet_results"]["result"]
 
             if tweet["__typename"] == "TweetWithVisibilityResults":

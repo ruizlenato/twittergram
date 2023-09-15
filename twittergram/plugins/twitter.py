@@ -13,7 +13,7 @@ from ..bot import Client
 from ..locales import locale
 from ..utils import TwitterAPI
 
-TWITTER_LINKS = r"(https?://(?:www.|mobile.)?twitter.com/.*?/.*?/([0-9]+))"
+TWITTER_LINKS = r"(https?://(?:www.|mobile.)?(twitter|x).com/.*?/.*?/([0-9]+))"
 
 
 @Client.on_message(filters.command(["twitter", "uinfo"]))
