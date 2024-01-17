@@ -1,3 +1,5 @@
 {
+    "start_message": "Olá <b>%s</b>, me chamo %s",
     "start_message": "Olá <b>%s</b>, me chamo %s"
+    "about_button": "ℹ️ Sobre"
 }

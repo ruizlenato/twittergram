@@ -1,3 +1,4 @@
 {
-    "start_message": "Hello <b>%s</b>, my name is %s"
+    "start_message": "Hello <b>%s</b>, my name is %s",
+    "about_button": "ℹ️ About"
 }
