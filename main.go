@@ -46,6 +46,9 @@ func main() {
 	bh, _ := telegohandler.NewBotHandler(bot, updates)
 	handler := twittergram.NewHandler(bot, bh)
 	handler.RegisterHandlers()
+	bot.DeleteWebhook(&telego.DeleteWebhookParams{
+		DropPendingUpdates: true,
+	})
 
 	// Call method getMe
 	botUser, err := bot.GetMe()
