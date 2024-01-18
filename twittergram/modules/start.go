@@ -125,6 +125,9 @@ func LanguageMenu(bot *telego.Bot, update telego.Update) {
 	})
 }
 
+// LanguageSet updates the language preference for a user or a group based on the provided CallbackQuery.
+// It retrieves the language information from the CallbackQuery data, determines the appropriate database table (users or groups),
+// and updates the language for the corresponding user or group in the database.
 func LanguageSet(bot *telego.Bot, query telego.CallbackQuery) {
 	lang := strings.ReplaceAll(query.Data, "setLang ", "")
 
