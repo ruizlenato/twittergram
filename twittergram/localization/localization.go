@@ -35,7 +35,7 @@ func GetAllLocalesFiles() error {
 	return err
 }
 
-func load(lang string) (map[string]string, error) {
+func Load(lang string) (map[string]string, error) {
 	if cached, ok := langCache.Load(lang); ok {
 		if langMap, ok := cached.(map[string]string); ok {
 			return langMap, nil
@@ -65,7 +65,7 @@ func Get(key string, message telego.Message) string {
 	if err != nil {
 		log.Print(err)
 	}
-	loaded, err := load(language)
+	loaded, err := Load(language)
 	if err != nil {
 		log.Fatal("Error loading language file:", err)
 	}

@@ -1,7 +1,12 @@
 {
+    "lang_name": "English (US)",
+    "lang_flag": "🇺🇸",
     "start_message": "Hello <b>%s</b>, my name is %s",
     "info_message": "<b>— %s</b>\n\n<b>• Source Code:</b> <a href='github.com/ruizlenato/twittegram'>GitHub</a>\n<b>• Developer:</b> @ruizlenato",
     "donate_mesage": "\n\n<b>💸 Donate:</b>\nHelp keep the bot online, make a donation via PIX or PayPal.\n<b>Pix Key and PayPal Email:</b> <code>ruizlenato@proton.me</code>",
+    "language_menu_mesage": "<b>Your current language:</b> %s %s\n\nSelect below the language you want to use the bot.",
+    "language_changed_successfully": "The language has been changed successfully.",
+    "language_button": "🌐 Language",
     "back_button": "↩️ Back",
     "about_button": "ℹ️ About"
 }
