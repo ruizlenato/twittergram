@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"twittergram/twittergram"
 	"twittergram/twittergram/database"
+	"twittergram/twittergram/localization"
 
 	"github.com/caarlos0/env/v10"
 	_ "github.com/joho/godotenv/autoload"
@@ -50,6 +51,12 @@ func main() {
 	botUser, err := bot.GetMe()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Get a list of available languages
+	if err := localization.GetAllLocalesFiles(); err != nil {
+		fmt.Println("Error:", err)
+		return
 	}
 
 	// Open a new SQLite database file

@@ -23,5 +23,6 @@ func NewHandler(bot *telego.Bot, bh *th.BotHandler) *Handler {
 
 func (h *Handler) RegisterHandlers() {
 	h.bh.Use(database.SaveUsers)
-	h.bh.HandleMessage(modules.StartCmd, th.CommandEqual("start"))
+	h.bh.HandleMessage(modules.Start, th.CommandEqual("start"))
+	h.bh.HandleMessage(modules.TwitterURL, th.TextMatches(regexp.MustCompile(`https?://(?:www.|mobile.)?(?:twitter|x).com/.*?/.*?/([0-9]+)`)))
 }

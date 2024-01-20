@@ -4,13 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"slices"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/mymmrac/telego"
 	"github.com/mymmrac/telego/telegohandler"
 )
 
-var DB *sql.DB
+var (
+	DB               *sql.DB
+	AvailableLocales []string
+)
 
 func Open(databaseFile string) error {
 	db, err := sql.Open("sqlite3", databaseFile+"?_journal_mode=WAL")
@@ -53,21 +57,24 @@ func Close() {
 }
 
 func SaveUsers(bot *telego.Bot, update telego.Update, next telegohandler.Handler) {
-	message := update.Message
-	if message.SenderChat != nil {
+	if update.Message.SenderChat != nil {
 		return
 	}
 
-	if message.From.ID != message.Chat.ID {
+	if update.Message.From.ID != update.Message.Chat.ID {
 		query := "INSERT OR IGNORE INTO groups (id) VALUES (?);"
-		_, err := DB.Exec(query, message.Chat.ID)
+		_, err := DB.Exec(query, update.Message.Chat.ID)
 		if err != nil {
 			log.Print("Error inserting group:", err)
 		}
 	}
 
 	query := "INSERT OR IGNORE INTO users (id, language) VALUES (?, ?);"
-	_, err := DB.Exec(query, message.From.ID, message.From.LanguageCode)
+	lang := update.Message.From.LanguageCode
+	if !slices.Contains(AvailableLocales, lang) {
+		lang = "en-us"
+	}
+	_, err := DB.Exec(query, update.Message.From.ID, lang)
 	if err != nil {
 		log.Print("Error inserting user:", err)
 	}
