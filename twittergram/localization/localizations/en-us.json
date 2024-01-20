@@ -1,4 +1,7 @@
 {
     "start_message": "Hello <b>%s</b>, my name is %s",
+    "info_message": "<b>— %s</b>\n\n<b>• Source Code:</b> <a href='github.com/ruizlenato/twittegram'>GitHub</a>\n<b>• Developer:</b> @ruizlenato",
+    "donate_mesage": "\n\n<b>💸 Donate:</b>\nHelp keep the bot online, make a donation via PIX or PayPal.\n<b>Pix Key and PayPal Email:</b> <code>ruizlenato@proton.me</code>",
+    "back_button": "↩️ Back",
     "about_button": "ℹ️ About"
 }

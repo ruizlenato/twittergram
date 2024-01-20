@@ -33,14 +33,18 @@ func Start(bot *telego.Bot, update telego.Update) {
 
 }
 
-func Start(bot *telego.Bot, message telego.Message) {
+func About(bot *telego.Bot, query telego.CallbackQuery) {
 	botUser, err := bot.GetMe()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bot.SendMessage(telegoutil.Message(
-		telegoutil.ID(message.Chat.ID),
-		fmt.Sprintf(localization.Get("start_message", message), message.From.FirstName, botUser.FirstName),
-	).WithParseMode(telego.ModeHTML))
+	bot.EditMessageText(&telego.EditMessageTextParams{
+		ChatID:      telegoutil.ID(query.Message.Chat.ID),
+		MessageID:   query.Message.MessageID,
+		Text:        fmt.Sprintf(localization.Get("info_message", *query.Message)+localization.Get("donate_mesage", *query.Message), botUser.FirstName),
+		ParseMode:   "HTML",
+		ReplyMarkup: telegoutil.InlineKeyboard(telegoutil.InlineKeyboardRow(telegoutil.InlineKeyboardButton(localization.Get("back_button", *query.Message)).WithCallbackData("start"))),
+	})
+
 }
