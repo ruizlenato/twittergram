@@ -57,24 +57,29 @@ func Close() {
 }
 
 func SaveUsers(bot *telego.Bot, update telego.Update, next telegohandler.Handler) {
-	if update.Message.SenderChat != nil {
+	Message := update.Message
+	if Message == nil {
+		Message = update.CallbackQuery.Message
+	}
+
+	if Message.SenderChat != nil {
 		return
 	}
 
-	if update.Message.From.ID != update.Message.Chat.ID {
+	if Message.From.ID != Message.Chat.ID {
 		query := "INSERT OR IGNORE INTO groups (id) VALUES (?);"
-		_, err := DB.Exec(query, update.Message.Chat.ID)
+		_, err := DB.Exec(query, Message.Chat.ID)
 		if err != nil {
 			log.Print("Error inserting group:", err)
 		}
 	}
 
 	query := "INSERT OR IGNORE INTO users (id, language) VALUES (?, ?);"
-	lang := update.Message.From.LanguageCode
+	lang := Message.From.LanguageCode
 	if !slices.Contains(AvailableLocales, lang) {
 		lang = "en-us"
 	}
-	_, err := DB.Exec(query, update.Message.From.ID, lang)
+	_, err := DB.Exec(query, Message.From.ID, lang)
 	if err != nil {
 		log.Print("Error inserting user:", err)
 	}
