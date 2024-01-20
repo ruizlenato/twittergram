@@ -45,6 +45,12 @@ func main() {
 	handler := twittergram.NewHandler(bot, bh)
 	handler.RegisterHandlers()
 
+	// Call method getMe
+	botUser, err := bot.GetMe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Open a new SQLite database file
 	if err := database.Open(); err != nil {
 		log.Fatal(err)
@@ -59,13 +65,13 @@ func main() {
 	go func() {
 		// Wait for stop signal
 		<-sigs
-		fmt.Println("Stopping...")
+		fmt.Println("\033[0;31mStopping...\033[0m")
 
 		bot.StopLongPolling()
-		fmt.Println("Long polling done")
+		fmt.Println("Long polling stopped")
 
 		bh.Stop()
-		fmt.Println("Bot handler done")
+		fmt.Println("Bot handler stopped")
 
 		// Close the database connection
 		database.Close()
@@ -74,6 +80,8 @@ func main() {
 	}()
 
 	go bh.Start()
+	fmt.Println("\033[0;32m\U0001F680 Bot Started\033[0m")
+	fmt.Printf("\033[0;36mBot Info:\033[0m %v - @%v\n", botUser.FirstName, botUser.Username)
 
 	<-done
 	fmt.Println("Done")
