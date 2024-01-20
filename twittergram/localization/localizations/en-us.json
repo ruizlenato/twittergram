@@ -10,5 +10,6 @@
     "start_button": "Start a chat",
     "language_button": "🌐 Language",
     "back_button": "↩️ Back",
-    "about_button": "ℹ️ About"
+    "about_button": "ℹ️ About",
+    "no_admin": "You're not an administrator!"
 }

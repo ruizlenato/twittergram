@@ -10,5 +10,6 @@
     "start_button": "Iniciar uma conversa",
     "language_button": "🌐 Idioma",
     "back_button": "↩️ Voltar",
-    "about_button": "ℹ️ Sobre"
+    "about_button": "ℹ️ Sobre",
+    "no_admin": "Você não é um administrador!"
 }

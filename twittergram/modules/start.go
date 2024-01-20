@@ -92,6 +92,17 @@ func About(bot *telego.Bot, query telego.CallbackQuery) {
 }
 
 func LanguageMenu(bot *telego.Bot, update telego.Update) {
+	if !checkAdmin(bot, update) {
+		if update.Message == nil {
+			bot.AnswerCallbackQuery(&telego.AnswerCallbackQueryParams{
+				CallbackQueryID: update.CallbackQuery.ID,
+				Text:            "Você não é admin",
+				ShowAlert:       true,
+			})
+		}
+		return
+	}
+
 	message := update.Message
 	if message == nil {
 		message = update.CallbackQuery.Message
@@ -143,6 +154,17 @@ func LanguageMenu(bot *telego.Bot, update telego.Update) {
 // It retrieves the language information from the CallbackQuery data, determines the appropriate database table (users or groups),
 // and updates the language for the corresponding user or group in the database.
 func LanguageSet(bot *telego.Bot, update telego.Update) {
+	if !checkAdmin(bot, update) {
+		if update.Message == nil {
+			bot.AnswerCallbackQuery(&telego.AnswerCallbackQueryParams{
+				CallbackQueryID: update.CallbackQuery.ID,
+				Text:            localization.Get("no_admin", *update.CallbackQuery.Message),
+				ShowAlert:       true,
+			})
+		}
+		return
+	}
+
 	lang := strings.ReplaceAll(update.CallbackQuery.Data, "setLang ", "")
 
 	// Determine the appropriate database table based on the chat type.
