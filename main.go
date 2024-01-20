@@ -20,20 +20,27 @@ type config struct {
 }
 
 func main() {
+	// Get Bot from environment variables (.env)
 	cfg := config{}
 	if err := env.Parse(&cfg); err != nil {
 		log.Fatalf("%+v\n", err)
 	}
+
+	// Create bot
 	bot, err := telego.NewBot(cfg.TelegramToken)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Initialize signal handling
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	done := make(chan struct{}, 1)
 
+	// Get updates
 	updates, _ := bot.UpdatesViaLongPolling(nil)
+
+	// Handle updates
 	bh, _ := telegohandler.NewBotHandler(bot, updates)
 	handler := twittergram.NewHandler(bot, bh)
 	handler.RegisterHandlers()
@@ -50,6 +57,7 @@ func main() {
 	}
 
 	go func() {
+		// Wait for stop signal
 		<-sigs
 		fmt.Println("Stopping...")
 
