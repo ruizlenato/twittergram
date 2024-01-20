@@ -6,10 +6,13 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"twittergram/twittergram/database"
 
 	"github.com/mymmrac/telego"
 )
+
+var langCache sync.Map
 
 func GetAllLocalesFiles() error {
 	database.AvailableLocales = nil
@@ -33,6 +36,12 @@ func GetAllLocalesFiles() error {
 }
 
 func load(lang string) (map[string]string, error) {
+	if cached, ok := langCache.Load(lang); ok {
+		if langMap, ok := cached.(map[string]string); ok {
+			return langMap, nil
+		}
+	}
+
 	data, err := os.ReadFile(fmt.Sprintf("twittergram/localization/localizations/%s.json", lang))
 	if err != nil {
 		return nil, err
@@ -43,6 +52,8 @@ func load(lang string) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	langCache.Store(lang, langMap)
 
 	return langMap, nil
 }
