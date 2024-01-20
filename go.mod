@@ -6,6 +6,7 @@ require (
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/goccy/go-json v0.10.2
 	github.com/joho/godotenv v1.5.1
+	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/mymmrac/telego v0.28.0
 	github.com/valyala/fasthttp v1.51.0
 )

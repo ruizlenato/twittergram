@@ -2,6 +2,7 @@ package twittergram
 
 import (
 	"regexp"
+	"twittergram/twittergram/database"
 	"twittergram/twittergram/modules"
 
 	"github.com/mymmrac/telego"
@@ -21,5 +22,6 @@ func NewHandler(bot *telego.Bot, bh *th.BotHandler) *Handler {
 }
 
 func (h *Handler) RegisterHandlers() {
+	h.bh.HandleMessage(database.SaveUsers)
 	h.bh.HandleMessage(modules.StartCmd, th.CommandEqual("start"))
 }

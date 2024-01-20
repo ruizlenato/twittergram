@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 	"twittergram/twittergram"
+	"twittergram/twittergram/database"
 
 	"github.com/caarlos0/env/v10"
 	_ "github.com/joho/godotenv/autoload"
@@ -34,9 +35,19 @@ func main() {
 
 	updates, _ := bot.UpdatesViaLongPolling(nil)
 	bh, _ := telegohandler.NewBotHandler(bot, updates)
-
 	handler := twittergram.NewHandler(bot, bh)
 	handler.RegisterHandlers()
+
+	// Open a new SQLite database file
+	if err := database.Open(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Define the tables
+	if err := database.CreateTables(); err != nil {
+		log.Fatal("Error creating table:", err)
+		return
+	}
 
 	go func() {
 		<-sigs
@@ -47,6 +58,9 @@ func main() {
 
 		bh.Stop()
 		fmt.Println("Bot handler done")
+
+		// Close the database connection
+		database.Close()
 
 		done <- struct{}{}
 	}()
