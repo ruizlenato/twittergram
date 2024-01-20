@@ -25,8 +25,9 @@ func (h *Handler) RegisterHandlers() {
 	h.bh.Use(database.SaveUsers)
 	h.bh.Handle(modules.Start, th.CommandEqual("start"))
 	h.bh.Handle(modules.Start, th.CallbackDataEqual("start"))
+	h.bh.Handle(modules.LanguageMenu, th.CommandEqual("lang"))
 	h.bh.Handle(modules.LanguageMenu, th.CallbackDataEqual("LanguageMenu"))
 	h.bh.HandleCallbackQuery(modules.About, th.CallbackDataEqual("about"))
-	h.bh.HandleCallbackQuery(modules.LanguageSet, th.CallbackDataPrefix("setLang"))
+	h.bh.Handle(modules.LanguageSet, th.CallbackDataPrefix("setLang"))
 	h.bh.HandleMessage(modules.TwitterURL, th.TextMatches(regexp.MustCompile(`https?://(?:www.|mobile.)?(?:twitter|x).com/.*?/.*?/([0-9]+)`)))
 }

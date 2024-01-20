@@ -5,7 +5,7 @@
     "start_message_group": "<b>Olá, sou o %s</b>\nTenho varias funções legais, para saber mais, clique no botão abaixo e inicie uma conversa comigo.",
     "info_message": "<b>— %s</b>\n\n<b>• Código Fonte:</b> <a href='github.com/ruizlenato/twittegram'>GitHub</a>\n<b>• Desenvolvedor:</b> @ruizlenato",
     "donate_mesage": "\n\n<b>💸 Contribua:</b>\nAjude a manter o bot no ar, faça uma doação via PIX ou PayPal.\n<b>Chave Pix e Email do PayPal:</b> <code>ruizlenato@proton.me</code>",
-    "language_menu_mesage": "<b>Seu idioma atual:</b> %s %s\n\n<b>Selecione abaixo o idioma que você quer utilizar no bot.</b>",
+    "language_menu_mesage": "<b>Idioma atual:</b> %s %s\n\n<b>Selecione abaixo o idioma que você quer utilizar no bot.</b>",
     "language_changed_successfully": "O idioma foi alterado com sucesso.",
     "start_button": "Iniciar uma conversa",
     "language_button": "🌐 Idioma",
