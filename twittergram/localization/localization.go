@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"twittergram/twittergram/database"
 
@@ -60,6 +61,9 @@ func Load(lang string) (map[string]string, error) {
 
 func Get(key string, message telego.Message) string {
 	row := database.DB.QueryRow("SELECT language FROM users WHERE id = ?;", message.Chat.ID)
+	if strings.Contains(message.Chat.Type, "group") {
+		row = database.DB.QueryRow("SELECT language FROM groups WHERE id = ?;", message.Chat.ID)
+	}
 	var language string
 	err := row.Scan(&language)
 	if err != nil {
@@ -67,7 +71,7 @@ func Get(key string, message telego.Message) string {
 	}
 	loaded, err := Load(language)
 	if err != nil {
-		log.Fatal("Error loading language file:", err)
+		loaded, _ = Load("en-us")
 	}
 	value, ok := loaded[key]
 	if !ok {
