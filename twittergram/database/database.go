@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/mymmrac/telego"
+	"github.com/mymmrac/telego/telegohandler"
 )
 
 const databaseFile = "./twittergram/database/database.sql"
@@ -53,7 +54,8 @@ func Close() {
 	}
 }
 
-func SaveUsers(bot *telego.Bot, message telego.Message) {
+func SaveUsers(bot *telego.Bot, update telego.Update, next telegohandler.Handler) {
+	message := update.Message
 	if message.SenderChat != nil {
 		return
 	}
@@ -71,4 +73,5 @@ func SaveUsers(bot *telego.Bot, message telego.Message) {
 	if err != nil {
 		log.Print("Error inserting user:", err)
 	}
+	next(bot, update)
 }
