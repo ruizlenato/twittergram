@@ -1,0 +1,2 @@
+# Twittergram
+> __Under development__. Twittergram is a bot for telegram written in golang using the telego library with some Twitter-related functions, such as downloading media and sending it to telegram. See more at [@twittergramrobot](https://t.me/twittergramrobot) or [@xgramrobot](https://t.me/xgramrobot)
