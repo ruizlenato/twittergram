@@ -10,11 +10,9 @@ import (
 	"github.com/mymmrac/telego/telegohandler"
 )
 
-const databaseFile = "./twittergram/database/database.sql"
-
 var DB *sql.DB
 
-func Open() error {
+func Open(databaseFile string) error {
 	db, err := sql.Open("sqlite3", databaseFile+"?_journal_mode=WAL")
 	if err != nil {
 		return err

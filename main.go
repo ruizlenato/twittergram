@@ -17,6 +17,7 @@ import (
 
 type config struct {
 	TelegramToken string `env:"TELEGRAM_TOKEN" validate:"required"`
+	DatabaseFile  string `env:"DATABASE_FILE" validate:"required"`
 }
 
 func main() {
@@ -52,7 +53,7 @@ func main() {
 	}
 
 	// Open a new SQLite database file
-	if err := database.Open(); err != nil {
+	if err := database.Open(cfg.DatabaseFile); err != nil {
 		log.Fatal(err)
 	}
 
