@@ -11,7 +11,7 @@ import (
 func checkAdmin(bot *telego.Bot, update telego.Update) bool {
 	message := update.Message
 	if message == nil {
-		message = update.CallbackQuery.Message
+		message = update.CallbackQuery.Message.(*telego.Message)
 	}
 
 	if message.Chat.Type == telego.ChatTypePrivate {

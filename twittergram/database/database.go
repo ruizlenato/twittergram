@@ -105,20 +105,20 @@ func Close() {
 // - This function is intended to be used as a middleware in a Telego handler chain.
 // - Ensure that the DB variable is correctly initialized before calling this function.
 func SaveUsers(bot *telego.Bot, update telego.Update, next telegohandler.Handler) {
-	Message := update.Message
-	if Message == nil {
-		Message = update.CallbackQuery.Message
+	message := update.Message
+	if message == nil {
+		message = update.CallbackQuery.Message.(*telego.Message)
 	}
 
 	// If the message is sent by the sender's chat (e.g., channels or anonymous users), return without further processing.
-	if Message.SenderChat != nil {
+	if message.SenderChat != nil {
 		return
 	}
 
 	// If the message is from a group, insert the group's ID into the 'groups' table.
-	if Message.From.ID != Message.Chat.ID {
+	if message.From.ID != message.Chat.ID {
 		query := "INSERT OR IGNORE INTO groups (id) VALUES (?);"
-		_, err := DB.Exec(query, Message.Chat.ID)
+		_, err := DB.Exec(query, message.Chat.ID)
 		if err != nil {
 			log.Print("Error inserting group:", err)
 		}
@@ -126,11 +126,11 @@ func SaveUsers(bot *telego.Bot, update telego.Update, next telegohandler.Handler
 
 	// Inserts user information into the 'users' table, including the user's ID and language code.
 	query := "INSERT OR IGNORE INTO users (id, language) VALUES (?, ?);"
-	lang := Message.From.LanguageCode
+	lang := message.From.LanguageCode
 	if !slices.Contains(AvailableLocales, lang) {
 		lang = "en-us"
 	}
-	_, err := DB.Exec(query, Message.From.ID, lang)
+	_, err := DB.Exec(query, message.From.ID, lang)
 	if err != nil {
 		log.Print("Error inserting user:", err)
 	}

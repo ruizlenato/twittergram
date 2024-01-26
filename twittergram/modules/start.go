@@ -18,19 +18,21 @@ func Start(bot *telego.Bot, update telego.Update) {
 	}
 
 	if update.Message == nil {
+		message := update.CallbackQuery.Message.(*telego.Message)
+
 		bot.EditMessageText(&telego.EditMessageTextParams{
-			ChatID:    telegoutil.ID(update.CallbackQuery.Message.Chat.ID),
-			MessageID: update.CallbackQuery.Message.MessageID,
-			Text:      fmt.Sprintf(localization.Get("start_message_private", *update.CallbackQuery.Message), update.CallbackQuery.Message.Chat.FirstName, botUser.FirstName),
+			ChatID:    telegoutil.ID(update.CallbackQuery.Message.GetChat().ID),
+			MessageID: update.CallbackQuery.Message.GetMessageID(),
+			Text:      fmt.Sprintf(localization.Get("start_message_private", message.Chat), message.Chat.FirstName, botUser.FirstName),
 			ParseMode: "HTML",
 			ReplyMarkup: telegoutil.InlineKeyboard(
 				telegoutil.InlineKeyboardRow(
 					telego.InlineKeyboardButton{
-						Text:         localization.Get("language_button", *update.CallbackQuery.Message),
+						Text:         localization.Get("language_button", message.Chat),
 						CallbackData: "LanguageMenu",
 					},
 					telego.InlineKeyboardButton{
-						Text:         localization.Get("about_button", *update.CallbackQuery.Message),
+						Text:         localization.Get("about_button", message.Chat),
 						CallbackData: "about",
 					},
 				)),
@@ -39,11 +41,11 @@ func Start(bot *telego.Bot, update telego.Update) {
 		if strings.Contains(update.Message.Chat.Type, "group") {
 			bot.SendMessage(&telego.SendMessageParams{
 				ChatID:    telegoutil.ID(update.Message.Chat.ID),
-				Text:      fmt.Sprintf(localization.Get("start_message_group", *update.Message), botUser.FirstName),
+				Text:      fmt.Sprintf(localization.Get("start_message_group", update.Message.Chat), botUser.FirstName),
 				ParseMode: "HTML",
 				ReplyMarkup: telegoutil.InlineKeyboard(telegoutil.InlineKeyboardRow(
 					telego.InlineKeyboardButton{
-						Text: localization.Get("start_button", *update.Message),
+						Text: localization.Get("start_button", update.Message.Chat),
 						URL:  fmt.Sprintf("https://t.me/%s?start=start", botUser.Username),
 					})),
 			})
@@ -51,16 +53,16 @@ func Start(bot *telego.Bot, update telego.Update) {
 		}
 		bot.SendMessage(&telego.SendMessageParams{
 			ChatID:    telegoutil.ID(update.Message.Chat.ID),
-			Text:      fmt.Sprintf(localization.Get("start_message_private", *update.Message), update.Message.From.FirstName, botUser.FirstName),
+			Text:      fmt.Sprintf(localization.Get("start_message_private", update.Message.Chat), update.Message.From.FirstName, botUser.FirstName),
 			ParseMode: "HTML",
 			ReplyMarkup: telegoutil.InlineKeyboard(
 				telegoutil.InlineKeyboardRow(
 					telego.InlineKeyboardButton{
-						Text:         localization.Get("language_button", *update.Message),
+						Text:         localization.Get("language_button", update.Message.Chat),
 						CallbackData: "LanguageMenu",
 					},
 					telego.InlineKeyboardButton{
-						Text:         localization.Get("about_button", *update.Message),
+						Text:         localization.Get("about_button", update.Message.Chat),
 						CallbackData: "about",
 					},
 				)),
@@ -76,14 +78,14 @@ func About(bot *telego.Bot, query telego.CallbackQuery) {
 	}
 
 	bot.EditMessageText(&telego.EditMessageTextParams{
-		ChatID:    telegoutil.ID(query.Message.Chat.ID),
-		MessageID: query.Message.MessageID,
-		Text:      fmt.Sprintf(localization.Get("info_message", *query.Message)+localization.Get("donate_mesage", *query.Message), botUser.FirstName),
+		ChatID:    telegoutil.ID(query.Message.GetChat().ID),
+		MessageID: query.Message.GetMessageID(),
+		Text:      fmt.Sprintf(localization.Get("info_message", query.Message.GetChat())+localization.Get("donate_mesage", query.Message.GetChat()), botUser.FirstName),
 		ParseMode: "HTML",
 		ReplyMarkup: telegoutil.InlineKeyboard(
 			telegoutil.InlineKeyboardRow(
 				telego.InlineKeyboardButton{
-					Text:         localization.Get("back_button", *query.Message),
+					Text:         localization.Get("back_button", query.Message.GetChat()),
 					CallbackData: "start",
 				}),
 		),
@@ -105,8 +107,10 @@ func LanguageMenu(bot *telego.Bot, update telego.Update) {
 
 	message := update.Message
 	if message == nil {
-		message = update.CallbackQuery.Message
+		message = update.CallbackQuery.Message.(*telego.Message)
 	}
+
+	chat := message.GetChat()
 
 	buttons := make([][]telego.InlineKeyboardButton, 0, len(database.AvailableLocales))
 	for _, lang := range database.AvailableLocales {
@@ -122,9 +126,9 @@ func LanguageMenu(bot *telego.Bot, update telego.Update) {
 	}
 
 	// Query the database to retrieve the language info based on the chat type.
-	row := database.DB.QueryRow("SELECT language FROM users WHERE id = ?;", message.Chat.ID)
-	if strings.Contains(message.Chat.Type, "group") {
-		row = database.DB.QueryRow("SELECT language FROM groups WHERE id = ?;", message.Chat.ID)
+	row := database.DB.QueryRow("SELECT language FROM users WHERE id = ?;", chat.ID)
+	if strings.Contains(chat.Type, "group") {
+		row = database.DB.QueryRow("SELECT language FROM groups WHERE id = ?;", chat.ID)
 	}
 	var language string        // Variable to store the language information retrieved from the database.
 	err := row.Scan(&language) // Scan method to retrieve the value of the "language" column from the query result.
@@ -134,16 +138,16 @@ func LanguageMenu(bot *telego.Bot, update telego.Update) {
 
 	if update.Message == nil {
 		bot.EditMessageText(&telego.EditMessageTextParams{
-			ChatID:      telegoutil.ID(message.Chat.ID),
-			MessageID:   message.MessageID,
-			Text:        fmt.Sprintf(localization.Get("language_menu_mesage", *message), localization.Get("lang_flag", *message), localization.Get("lang_name", *message)),
+			ChatID:      telegoutil.ID(chat.ID),
+			MessageID:   update.CallbackQuery.Message.GetMessageID(),
+			Text:        fmt.Sprintf(localization.Get("language_menu_mesage", chat), localization.Get("lang_flag", chat), localization.Get("lang_name", chat)),
 			ParseMode:   "HTML",
 			ReplyMarkup: telegoutil.InlineKeyboard(buttons...),
 		})
 	} else {
 		bot.SendMessage(&telego.SendMessageParams{
-			ChatID:      telegoutil.ID(message.Chat.ID),
-			Text:        fmt.Sprintf(localization.Get("language_menu_mesage", *message), localization.Get("lang_flag", *message), localization.Get("lang_name", *message)),
+			ChatID:      telegoutil.ID(update.Message.Chat.ID),
+			Text:        fmt.Sprintf(localization.Get("language_menu_mesage", chat), localization.Get("lang_flag", chat), localization.Get("lang_name", chat)),
 			ParseMode:   "HTML",
 			ReplyMarkup: telegoutil.InlineKeyboard(buttons...),
 		})
@@ -158,7 +162,7 @@ func LanguageSet(bot *telego.Bot, update telego.Update) {
 		if update.Message == nil {
 			bot.AnswerCallbackQuery(&telego.AnswerCallbackQueryParams{
 				CallbackQueryID: update.CallbackQuery.ID,
-				Text:            localization.Get("no_admin", *update.CallbackQuery.Message),
+				Text:            localization.Get("no_admin", update.CallbackQuery.Message.GetChat()),
 				ShowAlert:       true,
 			})
 		}
@@ -169,27 +173,27 @@ func LanguageSet(bot *telego.Bot, update telego.Update) {
 
 	// Determine the appropriate database table based on the chat type.
 	dbQuery := "UPDATE users SET language = ? WHERE id = ?;"
-	if strings.Contains(update.CallbackQuery.Message.Chat.Type, "group") {
+	if strings.Contains(update.CallbackQuery.Message.GetChat().Type, "group") {
 		dbQuery = "UPDATE groups SET language = ? WHERE id = ?;"
 	}
-	_, err := database.DB.Exec(dbQuery, lang, update.CallbackQuery.Message.Chat.ID)
+	_, err := database.DB.Exec(dbQuery, lang, update.CallbackQuery.Message.GetChat().ID)
 	if err != nil {
 		log.Print("Error inserting user:", err)
 	}
 
 	buttons := make([][]telego.InlineKeyboardButton, 0, len(database.AvailableLocales))
 
-	if update.CallbackQuery.Message.Chat.Type == telego.ChatTypePrivate {
+	if update.CallbackQuery.Message.GetChat().Type == telego.ChatTypePrivate {
 		buttons = append(buttons, []telego.InlineKeyboardButton{{
-			Text:         localization.Get("back_button", *update.CallbackQuery.Message),
+			Text:         localization.Get("back_button", update.CallbackQuery.Message.GetChat()),
 			CallbackData: "start",
 		}})
 	}
 
 	bot.EditMessageText(&telego.EditMessageTextParams{
-		ChatID:      telegoutil.ID(update.CallbackQuery.Message.Chat.ID),
-		MessageID:   update.CallbackQuery.Message.MessageID,
-		Text:        localization.Get("language_changed_successfully", *update.CallbackQuery.Message),
+		ChatID:      telegoutil.ID(update.CallbackQuery.Message.GetChat().ID),
+		MessageID:   update.CallbackQuery.Message.GetMessageID(),
+		Text:        localization.Get("language_changed_successfully", update.CallbackQuery.Message.GetChat()),
 		ParseMode:   "HTML",
 		ReplyMarkup: telegoutil.InlineKeyboard(buttons...),
 	})

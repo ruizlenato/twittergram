@@ -59,10 +59,10 @@ func Load(lang string) (map[string]string, error) {
 	return langMap, nil
 }
 
-func Get(key string, message telego.Message) string {
-	row := database.DB.QueryRow("SELECT language FROM users WHERE id = ?;", message.Chat.ID)
-	if strings.Contains(message.Chat.Type, "group") {
-		row = database.DB.QueryRow("SELECT language FROM groups WHERE id = ?;", message.Chat.ID)
+func Get(key string, chat telego.Chat) string {
+	row := database.DB.QueryRow("SELECT language FROM users WHERE id = ?;", chat.ID)
+	if strings.Contains(chat.Type, "group") {
+		row = database.DB.QueryRow("SELECT language FROM groups WHERE id = ?;", chat.ID)
 	}
 	var language string
 	err := row.Scan(&language)
