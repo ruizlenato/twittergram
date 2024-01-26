@@ -46,6 +46,10 @@ func TwitterURL(bot *telego.Bot, message telego.Message) {
 		}
 	}
 
+	if len(mediaItems) < 2 && mediaItems[0].MediaType() == "photo" && !message.LinkPreviewOptions.IsDisabled {
+		return
+	}
+
 	if len(mediaItems) > 0 {
 		for _, media := range tweet.Medias[:1] {
 			if mediaItems[0].MediaType() == "photo" {
