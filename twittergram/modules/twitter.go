@@ -21,16 +21,28 @@ type Tweet struct {
 	Caption string
 }
 
-func TwitterURL(bot *telego.Bot, message telego.Message) {
-	index := strings.Index(message.Text, "twitter.com/")
-	if index == -1 {
+func extractTwitterURL(s string) string {
+	prefixes := []string{"x.com/", "twitter.com/"}
+	for _, prefix := range prefixes {
+		index := strings.Index(s, prefix)
+		if index != -1 {
+			// Directly return the trimmed URL
+			return strings.TrimSpace(s[index:])
+		}
+	}
+	// Return an empty string if no match is found
+	return ""
+}
+
+	url := extractTwitterURL(message.Text)
+	if url == "" {
 		bot.SendMessage(telegoutil.Message(
 			telegoutil.ID(message.Chat.ID),
 			"No twitter url",
 		))
 		return
 	}
-	url := strings.Split(message.Text[index:], " ")[0]
+
 	var tweet Tweet
 	_, body, _ := fasthttp.Get(nil, fmt.Sprintf("https://smudgeapi.ruizlenato.duckdns.org/twitter?url=%s", url))
 	json.Unmarshal(body, &tweet)
