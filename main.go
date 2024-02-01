@@ -56,8 +56,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Get a list of available languages
-	if err := localization.GetAllLocalesFiles(); err != nil {
+	if err := localization.LoadLanguages(); err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
