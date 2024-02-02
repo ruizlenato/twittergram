@@ -32,13 +32,14 @@ func Start(bot *telego.Bot, update telego.Update) {
 						CallbackData: "LanguageMenu",
 					},
 					telego.InlineKeyboardButton{
-						Text:         i18n("about_button"),
+						Text:         i18n("help_button"),
+						CallbackData: "HelpMenu",
 					},
 				),
 				telegoutil.InlineKeyboardRow(
 					telego.InlineKeyboardButton{
-						Text:         i18n("help_button"),
-						CallbackData: "HelpMenu",
+						Text:         i18n("about_button"),
+						CallbackData: "AboutMenu",
 					},
 				),
 			),
@@ -69,13 +70,14 @@ func Start(bot *telego.Bot, update telego.Update) {
 						CallbackData: "LanguageMenu",
 					},
 					telego.InlineKeyboardButton{
-						Text:         i18n("about_button"),
+						Text:         i18n("help_button"),
+						CallbackData: "HelpMenu",
 					},
 				),
 				telegoutil.InlineKeyboardRow(
 					telego.InlineKeyboardButton{
-						Text:         i18n("help_button"),
-						CallbackData: "HelpMenu",
+						Text:         i18n("about_button"),
+						CallbackData: "AboutMenu",
 					},
 				),
 			),
@@ -93,7 +95,7 @@ func About(bot *telego.Bot, query telego.CallbackQuery) {
 	bot.EditMessageText(&telego.EditMessageTextParams{
 		ChatID:    telegoutil.ID(query.Message.GetChat().ID),
 		MessageID: query.Message.GetMessageID(),
-		Text:      fmt.Sprintf(i18n("info_message")+i18n("donate_mesage"), botUser.FirstName),
+		Text:      fmt.Sprintf(i18n("info_message")+i18n("donate_message"), botUser.FirstName),
 		ParseMode: "HTML",
 		ReplyMarkup: telegoutil.InlineKeyboard(
 			telegoutil.InlineKeyboardRow(
@@ -167,6 +169,25 @@ func LanguageMenu(bot *telego.Bot, update telego.Update) {
 			ReplyMarkup: telegoutil.InlineKeyboard(buttons...),
 		})
 	}
+}
+
+func Help(bot *telego.Bot, query telego.CallbackQuery) {
+	i18n := localization.Get(query.Message.GetChat())
+
+	bot.EditMessageText(&telego.EditMessageTextParams{
+		ChatID:    telegoutil.ID(query.Message.GetChat().ID),
+		MessageID: query.Message.GetMessageID(),
+		Text:      i18n("help_message"),
+		ParseMode: "HTML",
+		ReplyMarkup: telegoutil.InlineKeyboard(
+			telegoutil.InlineKeyboardRow(
+				telego.InlineKeyboardButton{
+					Text:         i18n("back_button"),
+					CallbackData: "start",
+				}),
+		),
+	})
+
 }
 
 // LanguageSet updates the language preference for a user or a group based on the provided CallbackQuery.

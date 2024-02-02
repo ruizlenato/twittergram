@@ -27,6 +27,7 @@ func (h *Handler) RegisterHandlers() {
 	h.bh.Handle(modules.Start, th.CallbackDataEqual("start"))
 	h.bh.Handle(modules.LanguageMenu, th.CommandEqual("lang"))
 	h.bh.Handle(modules.LanguageMenu, th.CallbackDataEqual("LanguageMenu"))
+	h.bh.HandleCallbackQuery(modules.About, th.CallbackDataEqual("AboutMenu"))
 	h.bh.HandleCallbackQuery(modules.Help, th.CallbackDataEqual("HelpMenu"))
 	h.bh.Handle(modules.LanguageSet, th.CallbackDataPrefix("setLang"))
 	h.bh.HandleMessage(modules.MediaDownloader, th.TextMatches(regexp.MustCompile(`https?://(?:www.|mobile.)?(?:twitter|x).com/.*?/.*?/([0-9]+)`)))

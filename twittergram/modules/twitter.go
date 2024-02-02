@@ -34,6 +34,7 @@ func extractTwitterURL(s string) string {
 	return ""
 }
 
+func MediaDownloader(bot *telego.Bot, message telego.Message) {
 	url := extractTwitterURL(message.Text)
 	if url == "" {
 		bot.SendMessage(telegoutil.Message(
