@@ -33,9 +33,15 @@ func Start(bot *telego.Bot, update telego.Update) {
 					},
 					telego.InlineKeyboardButton{
 						Text:         i18n("about_button"),
-						CallbackData: "about",
 					},
-				)),
+				),
+				telegoutil.InlineKeyboardRow(
+					telego.InlineKeyboardButton{
+						Text:         i18n("help_button"),
+						CallbackData: "HelpMenu",
+					},
+				),
+			),
 		})
 	} else {
 		i18n := localization.Get(update.Message.Chat)
@@ -64,12 +70,17 @@ func Start(bot *telego.Bot, update telego.Update) {
 					},
 					telego.InlineKeyboardButton{
 						Text:         i18n("about_button"),
-						CallbackData: "about",
 					},
-				)),
+				),
+				telegoutil.InlineKeyboardRow(
+					telego.InlineKeyboardButton{
+						Text:         i18n("help_button"),
+						CallbackData: "HelpMenu",
+					},
+				),
+			),
 		})
 	}
-
 }
 
 func About(bot *telego.Bot, query telego.CallbackQuery) {
