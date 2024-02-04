@@ -107,9 +107,11 @@ func Close() {
 func SaveUsers(bot *telego.Bot, update telego.Update, next telegohandler.Handler) {
 	message := update.Message
 	if message == nil {
+		if update.CallbackQuery == nil {
+			return
+		}
 		message = update.CallbackQuery.Message.(*telego.Message)
 	}
-
 	// If the message is sent by the sender's chat (e.g., channels or anonymous users), return without further processing.
 	if message.SenderChat != nil {
 		return
