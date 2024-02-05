@@ -2,26 +2,13 @@ package modules
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"twittergram/twittergram/localization"
+	"twittergram/twittergram/twitter"
 
-	"github.com/goccy/go-json"
 	"github.com/mymmrac/telego"
 	"github.com/mymmrac/telego/telegoutil"
-	"github.com/valyala/fasthttp"
 )
-
-type tweet struct {
-	URL    string
-	Medias []struct {
-		Width   int
-		Height  int
-		Src     string
-		IsVideo bool `json:"is_video"`
-	}
-	Caption string
-}
 
 func extractTwitterURL(s string) string {
 	prefixes := []string{"x.com/", "twitter.com/"}
@@ -45,22 +32,19 @@ func MediaDownloader(bot *telego.Bot, message telego.Message) {
 		))
 		return
 	}
-
-	var tweet tweet
-	_, body, _ := fasthttp.Get(nil, fmt.Sprintf("https://smudgeapi.ruizlenato.duckdns.org/twitter?url=%s", url))
-	json.Unmarshal(body, &tweet)
-	if len(tweet.Medias) < 1 {
+	tweetMedias := twitter.TweetMedias(url)
+	if len(tweetMedias.Medias) < 1 {
 		return
 	}
 
 	// Create the slice with a length of 0 and a capacity of 10
 	mediaItems := make([]telego.InputMedia, 0, 10)
 
-	for _, media := range tweet.Medias {
-		if media.IsVideo {
-			mediaItems = append(mediaItems, telegoutil.MediaVideo(telegoutil.FileFromURL(media.Src)).WithWidth(media.Width).WithHeight(media.Height))
+	for _, media := range tweetMedias.Medias {
+		if media.Video {
+			mediaItems = append(mediaItems, telegoutil.MediaVideo(telegoutil.FileFromURL(media.Source)).WithWidth(media.Width).WithHeight(media.Height))
 		} else {
-			mediaItems = append(mediaItems, telegoutil.MediaPhoto(telegoutil.FileFromURL(media.Src)))
+			mediaItems = append(mediaItems, telegoutil.MediaPhoto(telegoutil.FileFromURL(media.Source)))
 		}
 	}
 
@@ -69,11 +53,11 @@ func MediaDownloader(bot *telego.Bot, message telego.Message) {
 	}
 
 	if len(mediaItems) > 0 {
-		for _, media := range tweet.Medias[:1] {
+		for _, media := range tweetMedias.Medias[:1] {
 			if mediaItems[0].MediaType() == "photo" {
-				mediaItems[0] = telegoutil.MediaPhoto(telegoutil.FileFromURL(media.Src)).WithCaption(tweet.Caption)
+				mediaItems[0] = telegoutil.MediaPhoto(telegoutil.FileFromURL(media.Source)).WithCaption(tweetMedias.Caption)
 			} else {
-				mediaItems[0] = telegoutil.MediaVideo(telegoutil.FileFromURL(media.Src)).WithWidth(media.Width).WithHeight(media.Height).WithCaption(tweet.Caption)
+				mediaItems[0] = telegoutil.MediaVideo(telegoutil.FileFromURL(media.Source)).WithWidth(media.Width).WithHeight(media.Height).WithCaption(tweetMedias.Caption)
 			}
 		}
 	}
@@ -94,30 +78,11 @@ func AccountInfo(bot *telego.Bot, message telego.Message) {
 		})
 		return
 	}
+
 	username := strings.Fields(message.Text)[1]
+	accountInfo := twitter.UserInfo(username)
 
-	variables := map[string]interface{}{
-		"screen_name":                username,
-		"withSafetyModeUserFields":   true,
-		"withSuperFollowsUserFields": true,
-	}
-
-	variablesJson, err := json.Marshal(variables)
-	if err != nil {
-		log.Print(err)
-	}
-
-	query := map[string]string{"variables": string(variablesJson)}
-	apiURL := "https://twitter.com/i/api/graphql/cYsDlVss-qimNYmNlb6inw/UserByScreenName"
-	body := TwitterAPI(apiURL, query).Body()
-
-	var twitterAPIData *TwitterAPIData
-	err = json.Unmarshal(body, &twitterAPIData)
-	if err != nil {
-		log.Println(err)
-	}
-
-	if twitterAPIData.Data.User == nil {
+	if accountInfo == nil {
 		bot.SendMessage(&telego.SendMessageParams{
 			ChatID:    telegoutil.ID(message.Chat.ID),
 			Text:      i18n("twitter_invalid_username"),
@@ -125,8 +90,6 @@ func AccountInfo(bot *telego.Bot, message telego.Message) {
 		})
 		return
 	}
-
-	accountInfo := twitterAPIData.Data.User.Result.Legacy
 
 	text := fmt.Sprintf(
 		"%s%s%s%s%s%s%s",
