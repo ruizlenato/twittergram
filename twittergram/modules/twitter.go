@@ -49,6 +49,9 @@ func MediaDownloader(bot *telego.Bot, message telego.Message) {
 	var tweet tweet
 	_, body, _ := fasthttp.Get(nil, fmt.Sprintf("https://smudgeapi.ruizlenato.duckdns.org/twitter?url=%s", url))
 	json.Unmarshal(body, &tweet)
+	if len(tweet.Medias) < 1 {
+		return
+	}
 
 	// Create the slice with a length of 0 and a capacity of 10
 	mediaItems := make([]telego.InputMedia, 0, 10)
