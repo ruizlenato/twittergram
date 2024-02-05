@@ -31,4 +31,5 @@ func (h *Handler) RegisterHandlers() {
 	h.bh.HandleCallbackQuery(modules.Help, th.CallbackDataEqual("HelpMenu"))
 	h.bh.Handle(modules.LanguageSet, th.CallbackDataPrefix("setLang"))
 	h.bh.HandleMessage(modules.MediaDownloader, th.TextMatches(regexp.MustCompile(`https?://(?:www.|mobile.)?(?:twitter|x).com/.*?/.*?/([0-9]+)`)))
+	h.bh.HandleMessage(modules.AccountInfo, th.CommandEqual("twitter"))
 }

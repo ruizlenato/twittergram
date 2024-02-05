@@ -13,5 +13,14 @@
     "help_button": "❓ Help",
     "back_button": "↩️ Back",
     "about_button": "ℹ️ About",
-    "no_admin": "You're not an administrator!"
+    "no_admin": "You're not an administrator!",
+    "twitter_no_username": "You forgot to specify the Twitter user name.\n<b>Command usage:</b> <code>/twitter (twitter username)</code>",
+    "twitter_invalid_username": "<b>The Twitter user could not be found</b>, make sure you've typed the account's username correctly.",
+    "twitter_profile_info": "<b><a href='twitter.com/%s'>@%s</a> Account Information (Twitter):</b>\n\n",
+    "twitter_profile_name": "<b>Name:</b> %s\n",
+    "twitter_profile_verified": "<b>Verified:</b> %t\n",
+    "twitter_profile_bio": "<b>Bio:</b> <code>%s</code>\n",
+    "twitter_profile_followers": "<b>Followers:</b> %d\n",
+    "twitter_profile_following": "<b>Following:</b> %d\n",
+    "twitter_profile_tweets": "<b>Tweets:</b> %d"
 }
