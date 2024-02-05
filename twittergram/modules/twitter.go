@@ -86,7 +86,7 @@ func MediaDownloader(bot *telego.Bot, message telego.Message) {
 
 func AccountInfo(bot *telego.Bot, message telego.Message) {
 	i18n := localization.Get(message.Chat)
-	if len(strings.Split(message.Text, " ")) < 2 {
+	if len(strings.Fields(message.Text)) < 2 {
 		bot.SendMessage(&telego.SendMessageParams{
 			ChatID:    telegoutil.ID(message.Chat.ID),
 			Text:      i18n("twitter_no_username"),
@@ -94,21 +94,22 @@ func AccountInfo(bot *telego.Bot, message telego.Message) {
 		})
 		return
 	}
-	username := strings.Split(message.Text, " ")[1]
+	username := strings.Fields(message.Text)[1]
 
 	variables := map[string]interface{}{
 		"screen_name":                username,
 		"withSafetyModeUserFields":   true,
 		"withSuperFollowsUserFields": true,
 	}
+
 	variablesJson, err := json.Marshal(variables)
 	if err != nil {
 		log.Print(err)
 	}
-	query := map[string]string{
-		"variables": string(variablesJson),
-	}
-	body := TwitterAPI("https://twitter.com/i/api/graphql/cYsDlVss-qimNYmNlb6inw/UserByScreenName", query).Body()
+
+	query := map[string]string{"variables": string(variablesJson)}
+	apiURL := "https://twitter.com/i/api/graphql/cYsDlVss-qimNYmNlb6inw/UserByScreenName"
+	body := TwitterAPI(apiURL, query).Body()
 
 	var twitterAPIData *TwitterAPIData
 	err = json.Unmarshal(body, &twitterAPIData)
@@ -127,13 +128,27 @@ func AccountInfo(bot *telego.Bot, message telego.Message) {
 
 	accountInfo := twitterAPIData.Data.User.Result.Legacy
 
-	text := fmt.Sprintf(i18n("twitter_profile_info"), username, username)
-	text += fmt.Sprintf(i18n("twitter_profile_name"), accountInfo.Name)
-	text += fmt.Sprintf(i18n("twitter_profile_verified"), accountInfo.Verified)
-	text += fmt.Sprintf(i18n("twitter_profile_bio"), accountInfo.Description)
-	text += fmt.Sprintf(i18n("twitter_profile_followers"), accountInfo.FollowersCount)
-	text += fmt.Sprintf(i18n("twitter_profile_following"), accountInfo.FriendsCount)
-	text += fmt.Sprintf(i18n("twitter_profile_tweets"), accountInfo.StatusesCount)
+	text := fmt.Sprintf(
+		"%s%s%s%s%s%s%s",
+		i18n("twitter_profile_info"),
+		i18n("twitter_profile_name"),
+		i18n("twitter_profile_verified"),
+		i18n("twitter_profile_bio"),
+		i18n("twitter_profile_followers"),
+		i18n("twitter_profile_following"),
+		i18n("twitter_profile_tweets"),
+	)
+	text = fmt.Sprintf(
+		text,
+		username,
+		username,
+		accountInfo.Name,
+		accountInfo.Verified,
+		accountInfo.Description,
+		accountInfo.FollowersCount,
+		accountInfo.FriendsCount,
+		accountInfo.StatusesCount,
+	)
 
 	bot.SendMessage(&telego.SendMessageParams{
 		ChatID:    telegoutil.ID(message.Chat.ID),
