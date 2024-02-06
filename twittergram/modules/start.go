@@ -97,6 +97,9 @@ func About(bot *telego.Bot, query telego.CallbackQuery) {
 		MessageID: query.Message.GetMessageID(),
 		Text:      fmt.Sprintf(i18n("info_message")+i18n("donate_message"), botUser.FirstName),
 		ParseMode: "HTML",
+		LinkPreviewOptions: &telego.LinkPreviewOptions{
+			IsDisabled: true,
+		},
 		ReplyMarkup: telegoutil.InlineKeyboard(
 			telegoutil.InlineKeyboardRow(
 				telego.InlineKeyboardButton{

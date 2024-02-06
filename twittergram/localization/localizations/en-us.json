@@ -3,7 +3,7 @@
     "lang_flag": "🇺🇸",
     "start_message_private": "Hello <b>%s</b>, my name is %s",
     "start_message_group": "Hello, I'm %s\nI have a lot of cool features. To find out more, click on the button below and start a conversation with me.",
-    "info_message": "<b>— %s</b>\n\n<b>• Source Code:</b> <a href='github.com/ruizlenato/twittegram'>GitHub</a>\n<b>• Developer:</b> @ruizlenato",
+    "info_message": "<b>— %s</b>\n\n<b>• Source Code:</b> <a href='github.com/ruizlenato/twittergram'>GitHub</a>\n<b>• Developer:</b> @ruizlenato",
     "donate_message": "\n\n<b>💸 Donate:</b>\nHelp keep the bot online, make a donation via PIX or PayPal.\n<b>Pix Key and PayPal Email:</b> <code>ruizlenato@proton.me</code>",
     "help_message": "<b>Here are all my available functions.</b>\n\n- <b>/twitter</b> [x/twitter username] — Returns information from the specified Twitter/X account.\n- <b>Send me a link to a tweet that contains some media </b> (<i>gifs, vídeos or photos</i>) <b>and I'll send the media contained in the tweet to you.</b>\n\n> All these functions work in groups, you just need add me to your group.",
     "language_menu_mesage": "<b>Current language:</b> %s %s\n\nSelect below the language you want to use the bot.",
