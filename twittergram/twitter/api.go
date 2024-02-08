@@ -154,6 +154,10 @@ func TweetMedias(url string) TweetContent {
 	}
 	tweetContent := &TweetContent{}
 
+	if tweetResult.(Legacy) == nil {
+		return TweetContent{}
+	}
+
 	for _, media := range tweetResult.(Legacy).ExtendedEntities.Media {
 		var videoType string
 		if slices.Contains([]string{"animated_gif", "video"}, media.Type) {
