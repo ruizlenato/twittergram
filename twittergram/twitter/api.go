@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/google/uuid"
@@ -171,10 +172,13 @@ func TweetMedias(url string) TweetContent {
 				Video:  false,
 			})
 		} else {
+			sort.Slice(media.VideoInfo.Variants, func(i, j int) bool {
+				return media.VideoInfo.Variants[i].Bitrate < media.VideoInfo.Variants[j].Bitrate
+			})
 			tweetContent.Medias = append(tweetContent.Medias, Medias{
 				Height: media.OriginalInfo.Height,
 				Width:  media.OriginalInfo.Width,
-				Source: media.VideoInfo.Variants[0].URL,
+				Source: media.VideoInfo.Variants[len(media.VideoInfo.Variants)-1].URL,
 				Video:  true,
 			})
 		}
