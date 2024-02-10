@@ -16,7 +16,7 @@ import (
 const (
 	tweetDetail      = "https://twitter.com/i/api/graphql/NmCeCgkVlsRGS1cAwqtgmw/TweetDetail"
 	userByScreenName = "https://twitter.com/i/api/graphql/cYsDlVss-qimNYmNlb6inw/UserByScreenName"
-	tweetIDRegex     = `.*(?:twitter|x).com/.+status/([A-Za-z0-9]+)`
+	tweetIDRegex     = `(?:http(?:s)?://)?(?:www.|mobile.)?(?:twitter|x).com/.*?/([0-9]+)`
 )
 
 func callTwitterAPI(link string, query map[string]string) *fasthttp.Response {
