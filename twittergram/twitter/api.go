@@ -143,6 +143,10 @@ func TweetMedias(url string) TweetContent {
 	}
 
 	var tweetResult interface{}
+	if twitterAPIData.Data.ThreadedConversationWithInjectionsV2 == nil {
+		return TweetContent{}
+	}
+
 	for _, entry := range twitterAPIData.Data.ThreadedConversationWithInjectionsV2.Instructions[0].Entries {
 		if entry.EntryID == fmt.Sprintf("tweet-%v", tweetID) {
 			if entry.Content.ItemContent.TweetResults.Result.Typename == "TweetWithVisibilityResults" {

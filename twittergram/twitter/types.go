@@ -14,7 +14,7 @@ type Medias struct {
 
 type TwitterAPIData struct {
 	Data *struct {
-		ThreadedConversationWithInjectionsV2 struct {
+		ThreadedConversationWithInjectionsV2 *struct {
 			Instructions []Instruction `json:"instructions"`
 		} `json:"threaded_conversation_with_injections_v2"`
 		User *struct {
