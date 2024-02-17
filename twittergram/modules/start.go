@@ -112,23 +112,24 @@ func About(bot *telego.Bot, query telego.CallbackQuery) {
 }
 
 func LanguageMenu(bot *telego.Bot, update telego.Update) {
-	if !checkAdmin(bot, update) {
-		if update.Message == nil {
-			bot.AnswerCallbackQuery(&telego.AnswerCallbackQueryParams{
-				CallbackQueryID: update.CallbackQuery.ID,
-				Text:            "Você não é admin",
-				ShowAlert:       true,
-			})
-		}
-		return
-	}
-
 	message := update.Message
 	if message == nil {
 		message = update.CallbackQuery.Message.(*telego.Message)
 	}
 
 	chat := message.GetChat()
+	i18n := localization.Get(chat)
+
+	if !checkAdmin(bot, update) {
+		if update.Message == nil {
+			bot.AnswerCallbackQuery(&telego.AnswerCallbackQueryParams{
+				CallbackQueryID: update.CallbackQuery.ID,
+				Text:            fmt.Sprint(i18n("no_admin")),
+				ShowAlert:       true,
+			})
+		}
+		return
+	}
 
 	buttons := make([][]telego.InlineKeyboardButton, 0, len(database.AvailableLocales))
 	for _, lang := range database.AvailableLocales {
@@ -153,8 +154,6 @@ func LanguageMenu(bot *telego.Bot, update telego.Update) {
 	if err != nil {
 		log.Print(err)
 	}
-
-	i18n := localization.Get(chat)
 
 	if update.Message == nil {
 		bot.EditMessageText(&telego.EditMessageTextParams{
