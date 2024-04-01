@@ -2,12 +2,16 @@ package modules
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"strings"
+
 	"twittergram/twittergram/localization"
 	"twittergram/twittergram/twitter"
 
 	"github.com/mymmrac/telego"
 	"github.com/mymmrac/telego/telegoutil"
+	"github.com/valyala/fasthttp"
 )
 
 func extractTwitterURL(s string) string {
@@ -23,6 +27,37 @@ func extractTwitterURL(s string) string {
 	return ""
 }
 
+func downloader(url string) (*os.File, error) {
+	request := fasthttp.AcquireRequest()
+	response := fasthttp.AcquireResponse()
+
+	client := &fasthttp.Client{ReadBufferSize: 16 * 1024}
+	request.SetRequestURI(url)
+	err := client.Do(request, response)
+	if err != nil {
+		log.Println(err)
+	}
+
+	file, err := os.CreateTemp("", "temp*")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = file.Write(response.Body()) // Write the byte slice to the file
+	if err != nil {
+		file.Close()
+		return nil, err
+	}
+
+	_, err = file.Seek(0, 0) // Seek back to the beginning of the file
+	if err != nil {
+		file.Close()
+		return nil, err
+	}
+
+	return file, err
+}
+
 func MediaDownloader(bot *telego.Bot, message telego.Message) {
 	url := extractTwitterURL(message.Text)
 	if url == "" {
@@ -32,6 +67,7 @@ func MediaDownloader(bot *telego.Bot, message telego.Message) {
 		))
 		return
 	}
+
 	tweetMedias := twitter.TweetMedias(url)
 	if len(tweetMedias.Medias) < 1 {
 		return
@@ -41,10 +77,12 @@ func MediaDownloader(bot *telego.Bot, message telego.Message) {
 	mediaItems := make([]telego.InputMedia, 0, 10)
 
 	for _, media := range tweetMedias.Medias {
-		if media.Video {
-			mediaItems = append(mediaItems, telegoutil.MediaVideo(telegoutil.FileFromURL(media.Source)).WithWidth(media.Width).WithHeight(media.Height))
-		} else {
-			mediaItems = append(mediaItems, telegoutil.MediaPhoto(telegoutil.FileFromURL(media.Source)))
+		if file, err := downloader(media.Source); err == nil {
+			if media.Video {
+				mediaItems = append(mediaItems, telegoutil.MediaVideo(telegoutil.File(file)).WithWidth(media.Width).WithHeight(media.Height))
+			} else {
+				mediaItems = append(mediaItems, telegoutil.MediaPhoto(telegoutil.File(file)))
+			}
 		}
 	}
 
@@ -53,19 +91,27 @@ func MediaDownloader(bot *telego.Bot, message telego.Message) {
 	}
 
 	if len(mediaItems) > 0 {
-		for _, media := range tweetMedias.Medias[:1] {
-			if mediaItems[0].MediaType() == "photo" {
-				mediaItems[0] = telegoutil.MediaPhoto(telegoutil.FileFromURL(media.Source)).WithCaption(tweetMedias.Caption)
-			} else {
-				mediaItems[0] = telegoutil.MediaVideo(telegoutil.FileFromURL(media.Source)).WithWidth(media.Width).WithHeight(media.Height).WithCaption(tweetMedias.Caption)
+		for _, media := range mediaItems[:1] {
+			switch media.MediaType() {
+			case "photo":
+				if photo, ok := media.(*telego.InputMediaPhoto); ok {
+					photo.WithCaption(tweetMedias.Caption).WithParseMode("HTML")
+				}
+			case "video":
+				if video, ok := media.(*telego.InputMediaVideo); ok {
+					video.WithCaption(tweetMedias.Caption).WithParseMode("HTML")
+				}
 			}
 		}
 	}
 
-	bot.SendMediaGroup(telegoutil.MediaGroup(
+	_, err := bot.SendMediaGroup(telegoutil.MediaGroup(
 		telegoutil.ID(message.Chat.ID),
 		mediaItems...,
 	))
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func AccountInfo(bot *telego.Bot, message telego.Message) {
@@ -118,5 +164,4 @@ func AccountInfo(bot *telego.Bot, message telego.Message) {
 		Text:      text,
 		ParseMode: "HTML",
 	})
-
 }
