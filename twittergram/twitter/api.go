@@ -124,7 +124,6 @@ func TweetMedias(url string) TweetContent {
 	featuresJson, _ := json.Marshal(features)
 	fieldTogglesJson, _ := json.Marshal(fieldtoggles)
 	variablesJson, err := json.Marshal(variables)
-
 	if err != nil {
 		log.Print(err)
 	}
@@ -143,7 +142,7 @@ func TweetMedias(url string) TweetContent {
 	}
 
 	var tweetResult interface{}
-	if twitterAPIData.Data.ThreadedConversationWithInjectionsV2 == nil {
+	if twitterAPIData.Data == nil || twitterAPIData.Data.ThreadedConversationWithInjectionsV2 == nil {
 		return TweetContent{}
 	}
 
@@ -159,7 +158,7 @@ func TweetMedias(url string) TweetContent {
 	}
 	tweetContent := &TweetContent{}
 
-	if tweetResult.(Legacy) == nil {
+	if tweetResult.(Legacy) == nil || tweetResult == nil {
 		return TweetContent{}
 	}
 
@@ -194,7 +193,8 @@ func TweetMedias(url string) TweetContent {
 
 	medias := TweetContent{
 		Medias:  tweetContent.Medias,
-		Caption: caption}
+		Caption: caption,
+	}
 
 	return medias
 }
