@@ -14,9 +14,9 @@ type Medias struct {
 
 type TwitterAPIData struct {
 	Data *struct {
-		ThreadedConversationWithInjectionsV2 *struct {
-			Instructions []Instruction `json:"instructions"`
-		} `json:"threaded_conversation_with_injections_v2"`
+		TweetResults *struct {
+			Result `json:"result"`
+		} `json:"tweetResult"`
 		User *struct {
 			Result struct {
 				Legacy Legacy `json:"legacy"`
@@ -25,18 +25,6 @@ type TwitterAPIData struct {
 	} `json:"data"`
 }
 
-type Instruction struct {
-	Entries []struct {
-		EntryID string `json:"entryId"`
-		Content struct {
-			ItemContent struct {
-				TweetResults struct {
-					Result `json:"result"`
-				} `json:"tweet_results"`
-			} `json:"itemContent"`
-		} `json:"content"`
-	} `json:"entries,omitempty"`
-}
 type Result struct {
 	Typename string `json:"__typename"`
 	Tweet    struct {
@@ -63,6 +51,7 @@ type Legacy *struct {
 	StatusesCount  int    `json:"statuses_count"`
 	Location       string `json:"location"`
 }
+
 type Media struct {
 	DisplayURL           string `json:"display_url"`
 	ExpandedURL          string `json:"expanded_url"`
