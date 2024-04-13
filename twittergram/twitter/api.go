@@ -203,7 +203,7 @@ func TweetMedias(url string) TweetContent {
 		log.Println(err)
 	}
 
-	if twitterAPIData.Data.TweetResults == nil || twitterAPIData.Data == nil {
+	if twitterAPIData == nil || twitterAPIData.Data.TweetResults.Legacy == nil {
 		return TweetContent{}
 	}
 	tweetContent := &TweetContent{}
