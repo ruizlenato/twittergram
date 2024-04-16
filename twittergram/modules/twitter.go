@@ -27,6 +27,17 @@ func extractTwitterURL(s string) string {
 	return ""
 }
 
+var mimeExtensions = map[string]string{
+	"image/jpeg":      "jpg",
+	"image/png":       "png",
+	"image/gif":       "gif",
+	"image/webp":      "webp",
+	"video/mp4":       "mp4",
+	"video/webm":      "webm",
+	"video/quicktime": "mov",
+	"video/x-msvideo": "avi",
+}
+
 func downloader(url string) (*os.File, error) {
 	request := fasthttp.AcquireRequest()
 	response := fasthttp.AcquireResponse()
@@ -38,7 +49,15 @@ func downloader(url string) (*os.File, error) {
 		log.Println(err)
 	}
 
-	file, err := os.CreateTemp("", "temp*")
+	extension := func(contentType []byte) string {
+		extension, ok := mimeExtensions[string(contentType)]
+		if !ok {
+			return ""
+		}
+		return extension
+	}
+
+	file, err := os.CreateTemp("", fmt.Sprintf("twittergram*.%s", extension(response.Header.ContentType())))
 	if err != nil {
 		return nil, err
 	}
