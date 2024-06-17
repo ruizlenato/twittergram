@@ -223,6 +223,9 @@ func TweetMedias(url string) TweetContent {
 		"responsive_web_enhance_cards_enabled":                                    false,
 	}
 
+	jsonMarshal := func(data interface{}) []byte {
+		result, _ := json.Marshal(data)
+		return result
 	}
 
 	body := request("https://twitter.com/i/api/graphql/5GOHgZe-8U2j5sVHQzEm9A/TweetResultByRestId", requestParams{
@@ -241,7 +244,7 @@ func TweetMedias(url string) TweetContent {
 	var twitterAPIData *TwitterAPIData
 	err := json.Unmarshal(body, &twitterAPIData)
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error unmarshalling Twitter data: %v", err)
 	}
 
 	if twitterAPIData == nil || twitterAPIData.Data.TweetResults.Legacy == nil {
