@@ -150,8 +150,14 @@ func TweetMedias(url string) TweetContent {
 	}
 	var caption string
 
-	if tweet := twitterAPIData.Data.TweetResults.Result.Legacy; tweet != nil {
-		caption = tweet.FullText
+	if tweet := (*twitterAPIData).Data.TweetResults.Result.Legacy; tweet != nil {
+		caption = fmt.Sprintf("<b>%s (<code>%s</code>)</b>:\n",
+			(*twitterAPIData).Data.TweetResults.Result.Core.UserResults.Result.Legacy.Name,
+			(*twitterAPIData).Data.TweetResults.Core.UserResults.Result.Legacy.ScreenName)
+
+		if idx := strings.LastIndex(tweet.FullText, " https://t.co/"); idx != -1 {
+			caption += tweet.FullText[:idx]
+		}
 	}
 
 	medias := TweetContent{

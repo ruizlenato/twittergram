@@ -30,7 +30,16 @@ type Result struct {
 	Tweet    struct {
 		Legacy Legacy `json:"legacy"`
 	} `json:"tweet"`
+	Core   Core   `json:"core"`
 	Legacy Legacy `json:"legacy"`
+}
+
+type Core struct {
+	UserResults struct {
+		Result struct {
+			Legacy Legacy `json:"legacy"`
+		} `json:"result"`
+	} `json:"user_results"`
 }
 
 type Legacy *struct {
@@ -39,6 +48,7 @@ type Legacy *struct {
 		Media []Media `json:"media"`
 	} `json:"extended_entities"`
 	Name        string `json:"name"`
+	ScreenName  string `json:"screen_name"`
 	Description string `json:"description"`
 	Entities    struct {
 		Description struct {
