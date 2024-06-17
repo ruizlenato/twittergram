@@ -111,15 +111,24 @@ func request(Link string, params requestParams) *fasthttp.Response {
 	return response
 }
 
+// getGuestToken retrieves a guest token from the Twitter API.
+// It sends a POST request to the "https://api.twitter.com/1.1/guest/activate.json" endpoint
+// and parses the response to extract the guest token.
+// The guest token is returned as a string.
 func getGuestToken() string {
 	type guestToken struct {
 		GuestToken string `json:"guest_token"`
 	}
-	body := requestPOST("https://api.twitter.com/1.1/guest/activate.json", []string{}).Body()
+
+	body := request("https://api.twitter.com/1.1/guest/activate.json", requestParams{
+		Method:  "POST",
+		Headers: headers,
+	}).Body()
+
 	var res guestToken
 	err := json.Unmarshal(body, &res)
 	if err != nil {
-		log.Print(err)
+		log.Printf("Error unmarshalling guest token: %v", err)
 	}
 
 	return res.GuestToken
