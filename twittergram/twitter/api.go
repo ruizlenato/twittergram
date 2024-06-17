@@ -12,14 +12,13 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func getCommonHeaders() map[string]string {
-	return map[string]string{
+var headers = map[string]string{
 		"Authorization":             "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA",
 		"x-twitter-client-language": "en",
 		"x-twitter-active-user":     "yes",
 		"Accept-language":           "en",
 		"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
-	}
+	"content-type":              "application/json",
 }
 
 const (
@@ -28,36 +27,42 @@ const (
 	tweetIDRegex     = `(?:http(?:s)?://)?(?:www.|mobile.)?(?:twitter|x).com/.*?/([0-9]+)`
 )
 
-func requestGET(link string, query map[string]string) *fasthttp.Response {
-	request := fasthttp.AcquireRequest()
-	response := fasthttp.AcquireResponse()
-
-	client := &fasthttp.Client{ReadBufferSize: 16 * 1024}
-
-	request.Header.SetMethod(fasthttp.MethodGet)
-	headers := mergeMaps(getCommonHeaders(),
-		map[string]string{
-			"content-type":  "application/json",
-			"x-guest-token": getGuestToken(),
-			"cookie":        fmt.Sprintf("guest_id=v1:%v;", getGuestToken()),
-		})
-	for key, value := range headers {
-		request.Header.Set(key, value)
-	}
-	request.SetRequestURI(link)
-	for key, value := range query {
-		request.URI().QueryArgs().Add(key, value)
-	}
-
-	err := client.Do(request, response)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return response
+type requestParams struct {
+	Method     string            // "GET", "OPTIONS" or "POST"
+	Headers    map[string]string // Common headers for both GET and POST
+	Query      map[string]string // Query parameters for GET
+	BodyString []string          // Body of the request for POST
 }
 
-func requestPOST(Link string, bodyString []string) *fasthttp.Response {
+// Request sends a GET, OPTIONS or POST request to the specified link with the provided parameters and returns the response.
+// The Link specifies the URL to send the request to.
+// The params contain additional parameters for the request, such as headers, query parameters, and body.
+// The Method field in params should be "GET" or "POST" to indicate the type of request.
+//
+// Example usage:
+//
+//	response := Request("https://api.example.com/users", RequestParams{
+//		Method: "GET",
+//		Headers: map[string]string{
+//			"Authorization": "Bearer your-token",
+//		},
+//		Query: map[string]string{
+//			"page":  "1",
+//			"limit": "10",
+//		},
+//	})
+//
+//	response := Request("https://example.com/api", RequestParams{
+//		Method: "POST",
+//		Headers: map[string]string{
+//			"Content-Type": "application/json",
+//		},
+//		BodyString: []string{
+//			"param1=value1",
+//			"param2=value2",
+//		},
+//	})
+func request(Link string, params requestParams) *fasthttp.Response {
 	request := fasthttp.AcquireRequest()
 	response := fasthttp.AcquireResponse()
 
@@ -66,17 +71,41 @@ func requestPOST(Link string, bodyString []string) *fasthttp.Response {
 		MaxConnsPerHost: 1024,
 	}
 
-	request.Header.SetMethod(fasthttp.MethodPost)
-	for key, value := range getCommonHeaders() {
+	request.Header.SetMethod(params.Method)
+	for key, value := range params.Headers {
 		request.Header.Set(key, value)
 	}
 
-	request.SetBodyString(strings.Join(bodyString, "&"))
+	if params.Method == fasthttp.MethodGet {
+		request.SetRequestURI(Link)
+		for key, value := range params.Query {
+			request.URI().QueryArgs().Add(key, value)
+		}
+	} else if params.Method == fasthttp.MethodOptions {
+		request.SetRequestURI(Link)
+		for key, value := range params.Query {
+			request.URI().QueryArgs().Add(key, value)
+		}
+	} else if params.Method == fasthttp.MethodPost {
+		request.SetBodyString(strings.Join(params.BodyString, "&"))
 	request.SetRequestURI(Link)
+	} else {
+		log.Print("[request/Request] Error: Unsupported method ", params.Method)
+		return response
+	}
 
 	err := client.Do(request, response)
 	if err != nil {
-		log.Print("[request/RequestPOST] Error:", err)
+		if strings.Contains(err.Error(), "missing port in address") {
+			return response
+		}
+		log.Print("[request/Request] Error: ", err)
+	}
+
+	fmt.Println(string(request.RequestURI()))
+
+	if params.Method == fasthttp.MethodGet {
+		fmt.Println(response)
 	}
 
 	return response
@@ -102,32 +131,38 @@ func UserInfo(username string) Legacy {
 		"withSafetyModeUserFields":   true,
 		"withSuperFollowsUserFields": true,
 	}
+
 	features := map[string]interface{}{
-		"hidden_profile_likes_enabled":                                      "true",
-		"hidden_profile_subscriptions_enabled":                              "true",
-		"rweb_tipjar_consumption_enabled":                                   "true",
-		"responsive_web_graphql_exclude_directive_enabled":                  "true",
-		"verified_phone_label_enabled":                                      "false",
-		"subscriptions_verification_info_is_identity_verified_enabled":      "true",
-		"subscriptions_verification_info_verified_since_enabled":            "true",
-		"highlights_tweets_tab_ui_enabled":                                  "true",
-		"responsive_web_twitter_article_notes_tab_enabled":                  "true",
-		"creator_subscriptions_tweet_preview_api_enabled":                   "true",
-		"responsive_web_graphql_skip_user_profile_image_extensions_enabled": "false",
-		"responsive_web_graphql_timeline_navigation_enabled":                "true",
-	}
-	variablesJson, err := json.Marshal(variables)
-	featuresJson, _ := json.Marshal(features)
-	if err != nil {
-		log.Print(err)
+		"hidden_profile_likes_enabled":                                      true,
+		"hidden_profile_subscriptions_enabled":                              true,
+		"rweb_tipjar_consumption_enabled":                                   true,
+		"responsive_web_graphql_exclude_directive_enabled":                  true,
+		"verified_phone_label_enabled":                                      false,
+		"subscriptions_verification_info_is_identity_verified_enabled":      true,
+		"subscriptions_verification_info_verified_since_enabled":            true,
+		"highlights_tweets_tab_ui_enabled":                                  true,
+		"responsive_web_twitter_article_notes_tab_enabled":                  true,
+		"creator_subscriptions_tweet_preview_api_enabled":                   true,
+		"responsive_web_graphql_skip_user_profile_image_extensions_enabled": false,
+		"responsive_web_graphql_timeline_navigation_enabled":                true,
 	}
 
-	body := requestGET(userByScreenName, map[string]string{
-		"variables": string(variablesJson),
-		"features":  string(featuresJson),
-	})
+	jsonMarshal := func(data interface{}) []byte {
+		result, _ := json.Marshal(data)
+		return result
+	}
+
+	body := request(userByScreenName, requestParams{
+		Method: "GET",
+		Query: map[string]string{
+			"variables": string(jsonMarshal(variables)),
+			"features":  string(jsonMarshal(features)),
+		},
+		Headers: headers,
+	}).Body()
+
 	var twitterAPIData *TwitterAPIData
-	err = json.Unmarshal(body.Body(), &twitterAPIData)
+	err := json.Unmarshal(body, &twitterAPIData)
 	if err != nil {
 		log.Println(err)
 	}
@@ -139,18 +174,10 @@ func UserInfo(username string) Legacy {
 	return twitterAPIData.Data.User.Result.Legacy
 }
 
-func mergeMaps(maps ...map[string]string) map[string]string {
-	merged := make(map[string]string)
-	for _, m := range maps {
-		for k, v := range m {
-			merged[k] = v
-		}
-	}
-	return merged
-}
-
 func TweetMedias(url string) TweetContent {
 	tweetID := (regexp.MustCompile((tweetIDRegex))).FindStringSubmatch(url)[1]
+	headers["x-guest-token"] = getGuestToken()
+	headers["cookie"] = fmt.Sprintf("guest_id=v1:%v;", getGuestToken())
 
 	variables := map[string]interface{}{
 		"tweetId":                                tweetID,
@@ -187,18 +214,23 @@ func TweetMedias(url string) TweetContent {
 		"responsive_web_enhance_cards_enabled":                                    false,
 	}
 
-	featuresJson, _ := json.Marshal(features)
-	variablesJson, err := json.Marshal(variables)
-	if err != nil {
-		log.Print(err)
 	}
 
-	body := requestGET(tweetDetail, map[string]string{
-		"variables": string(variablesJson),
-		"features":  string(featuresJson),
+	body := request("https://twitter.com/i/api/graphql/5GOHgZe-8U2j5sVHQzEm9A/TweetResultByRestId", requestParams{
+		Method: "GET",
+		Query: map[string]string{
+			"variables": string(jsonMarshal(variables)),
+			"features":  string(jsonMarshal(features)),
+		},
+		Headers: headers,
 	}).Body()
+
+	if body == nil {
+		return TweetContent{}
+	}
+
 	var twitterAPIData *TwitterAPIData
-	err = json.Unmarshal(body, &twitterAPIData)
+	err := json.Unmarshal(body, &twitterAPIData)
 	if err != nil {
 		log.Println(err)
 	}
