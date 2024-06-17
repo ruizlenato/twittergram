@@ -13,18 +13,18 @@ import (
 )
 
 var headers = map[string]string{
-		"Authorization":             "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA",
-		"x-twitter-client-language": "en",
-		"x-twitter-active-user":     "yes",
-		"Accept-language":           "en",
-		"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
+	"Authorization":             "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA",
+	"x-twitter-client-language": "en",
+	"x-twitter-active-user":     "yes",
+	"Accept-language":           "en",
+	"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
 	"content-type":              "application/json",
 }
 
 const (
 	tweetDetail      = "https://twitter.com/i/api/graphql/5GOHgZe-8U2j5sVHQzEm9A/TweetResultByRestId"
 	userByScreenName = "https://api.twitter.com/graphql/qW5u-DAuXpMEG0zA1F7UGQ/UserByScreenName"
-	tweetIDRegex     = `(?:http(?:s)?://)?(?:www.|mobile.)?(?:twitter|x).com/.*?/([0-9]+)`
+	tweetIDRegex     = `.*(?:twitter|x).com/.+status/([A-Za-z0-9]+)`
 )
 
 type requestParams struct {
@@ -88,7 +88,7 @@ func request(Link string, params requestParams) *fasthttp.Response {
 		}
 	} else if params.Method == fasthttp.MethodPost {
 		request.SetBodyString(strings.Join(params.BodyString, "&"))
-	request.SetRequestURI(Link)
+		request.SetRequestURI(Link)
 	} else {
 		log.Print("[request/Request] Error: Unsupported method ", params.Method)
 		return response
@@ -184,7 +184,14 @@ func UserInfo(username string) Legacy {
 }
 
 func TweetMedias(url string) TweetContent {
-	tweetID := (regexp.MustCompile((tweetIDRegex))).FindStringSubmatch(url)[1]
+	var tweetID string
+
+	if matches := regexp.MustCompile(tweetIDRegex).FindStringSubmatch(url); len(matches) == 2 {
+		tweetID = matches[1]
+	} else {
+		return TweetContent{}
+	}
+
 	headers["x-guest-token"] = getGuestToken()
 	headers["cookie"] = fmt.Sprintf("guest_id=v1:%v;", getGuestToken())
 
